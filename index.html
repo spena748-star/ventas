@@ -3,31 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>🚀 Ventas Mac Style - Login sin pistas</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
+    <title>Admin Ventas Pro - Control por voz</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
         }
 
         body {
-            background: linear-gradient(145deg, #e6e9f0 0%, #d1d6e0 100%);
+            background: linear-gradient(135deg, #f5f7fc 0%, #e9eef4 100%);
             min-height: 100vh;
-            padding: 30px 20px;
+            padding: 30px 24px;
         }
 
-        /* Pantalla de login */
         .login-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.75);
+            background: rgba(0, 0, 0, 0.55);
             backdrop-filter: blur(12px);
             display: flex;
             align-items: center;
@@ -36,422 +33,375 @@
         }
         .login-card {
             background: white;
-            border-radius: 48px;
+            border-radius: 32px;
             padding: 40px;
             width: 90%;
             max-width: 400px;
             text-align: center;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
         }
         .login-card h2 {
             font-size: 28px;
+            font-weight: 600;
             margin-bottom: 20px;
+            color: #1e293b;
         }
         .login-card input {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             margin: 15px 0;
-            border: 1.5px solid #e2e5ec;
-            border-radius: 40px;
-            font-size: 18px;
-            text-align: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 60px;
+            font-size: 16px;
         }
         .login-card button {
             width: 100%;
             padding: 14px;
-            background: #007aff;
+            background: #3b82f6;
             color: white;
             border: none;
-            border-radius: 40px;
-            font-size: 18px;
+            border-radius: 60px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
         }
         .error-msg {
-            color: #ff3b30;
+            color: #ef4444;
             margin-top: 12px;
-            font-size: 14px;
         }
 
-        /* Contenedor principal estilo Mac */
-        .mac-container {
+        .admin-container {
             max-width: 1600px;
             margin: 0 auto;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(2px);
+            background: white;
             border-radius: 32px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            padding: 20px 24px 32px;
-            transition: all 0.2s;
             display: none;
         }
-
-        /* Pestañas estilo macOS */
-        .mac-tabs {
+        .admin-header {
+            background: white;
+            padding: 20px 32px;
+            border-bottom: 1px solid #e2e8f0;
             display: flex;
-            gap: 6px;
-            background: rgba(255, 255, 255, 0.5);
-            padding: 8px 12px 0 12px;
-            border-radius: 20px 20px 0 0;
-            margin: -20px -24px 0 -24px;
-            backdrop-filter: blur(12px);
-            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
         }
-
-        .mac-tab {
-            padding: 12px 24px;
+        .admin-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #2563eb, #1e40af);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .tabs {
+            display: flex;
+            gap: 8px;
+            padding: 0 32px;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .tab-btn {
+            padding: 14px 24px;
             font-size: 15px;
             font-weight: 500;
             background: transparent;
             border: none;
+            cursor: pointer;
+            color: #475569;
             border-radius: 12px 12px 0 0;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            color: #3a3a3e;
+            transition: all 0.2s;
         }
-
-        .mac-tab:hover {
-            background: rgba(0, 0, 0, 0.05);
+        .tab-btn.active {
+            color: #3b82f6;
+            background: #eff6ff;
+            border-bottom: 2px solid #3b82f6;
         }
-
-        .mac-tab.active {
-            background: white;
-            color: #007aff;
-            box-shadow: 0 -2px 8px rgba(0,0,0,0.02), 0 2px 0 white;
-            font-weight: 600;
-        }
-
         .panel {
-            margin-top: 24px;
+            display: none;
+            padding: 28px 32px;
+            background: #f8fafc;
         }
-
-        .card-mac {
+        .panel.active {
+            display: block;
+        }
+        .card {
             background: white;
             border-radius: 24px;
-            padding: 20px 24px;
-            margin-bottom: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            padding: 24px;
+            margin-bottom: 28px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+            border: 1px solid #eef2f6;
         }
-
-        .top-panel {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        .info-card {
-            background: white;
-            border-radius: 24px;
-            padding: 18px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            text-align: center;
-        }
-        .info-card h3 {
-            font-size: 14px;
-            color: #6c6c70;
-            margin-bottom: 8px;
-        }
-        .cronometro {
-            font-size: 36px;
-            font-weight: 700;
-            font-family: monospace;
-            letter-spacing: 2px;
-            margin: 10px 0;
-        }
-        .btn-crono {
-            background: #e9ecef;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 40px;
-            font-size: 14px;
+        .card-title {
+            font-size: 18px;
             font-weight: 600;
-            margin: 0 4px;
-            cursor: pointer;
+            margin-bottom: 20px;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .btn-crono.primary { background: #007aff; color: white; }
-        .btn-crono.warning { background: #ff9f0a; color: white; }
-        .btn-crono.danger { background: #ff3b30; color: white; }
-        .descuento-input {
-            width: 80px;
-            text-align: center;
-            padding: 6px;
-            border-radius: 20px;
-            border: 1px solid #ccc;
-            margin-left: 8px;
-        }
-
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
+            margin-bottom: 28px;
         }
-
         .stat-card {
             background: white;
             border-radius: 24px;
-            padding: 18px;
+            padding: 20px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eef2f6;
         }
-
-        .stat-card h4 {
-            font-size: 14px;
-            color: #6c6c70;
-            margin-bottom: 8px;
-        }
-
         .stat-card .value {
             font-size: 32px;
             font-weight: 700;
-            color: #1c1c1e;
+            color: #0f172a;
         }
-
         .form-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-bottom: 16px;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 20px;
+            margin-bottom: 24px;
         }
-
         .form-group {
             display: flex;
             flex-direction: column;
             gap: 6px;
         }
-
         .form-group label {
             font-size: 12px;
             font-weight: 600;
-            color: #6c6c70;
+            color: #475569;
             text-transform: uppercase;
         }
-
         input, select {
-            padding: 12px 14px;
-            border: 1.5px solid #e2e5ec;
-            border-radius: 14px;
-            font-size: 15px;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 16px;
+            font-size: 14px;
             background: white;
         }
-
-        input:focus, select:focus {
-            border-color: #007aff;
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(0,122,255,0.2);
-        }
-
         button {
             padding: 10px 20px;
             border-radius: 40px;
-            font-weight: 600;
+            font-weight: 500;
             border: none;
             cursor: pointer;
-            background: #f2f2f5;
-            color: #1c1c1e;
+            transition: 0.2s;
         }
-
-        button.primary { background: #007aff; color: white; }
-        button.success { background: #34c759; color: white; }
-        button.danger { background: #ff3b30; color: white; }
-        button.warning { background: #ff9f0a; color: white; }
-        button.small { padding: 6px 12px; font-size: 13px; }
-
+        button.primary { background: #3b82f6; color: white; }
+        button.success { background: #10b981; color: white; }
+        button.danger { background: #ef4444; color: white; }
+        button.warning { background: #f59e0b; color: white; }
+        button.small { padding: 6px 12px; font-size: 12px; }
+        button.outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
+        .microphone-btn {
+            background: #3b82f6;
+            color: white;
+            border-radius: 60px;
+            padding: 10px 20px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .microphone-btn.listening {
+            background: #ef4444;
+            animation: pulse 1.5s infinite;
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.6; }
+            100% { opacity: 1; }
+        }
+        .voice-status {
+            background: #f1f5f9;
+            border-radius: 40px;
+            padding: 6px 12px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
         .table-wrapper {
             overflow-x: auto;
             border-radius: 20px;
         }
-
         table {
             width: 100%;
             border-collapse: collapse;
             font-size: 13px;
         }
-
         th {
-            background: #f8f9fc;
-            padding: 14px 10px;
             text-align: left;
+            padding: 14px 12px;
+            background: #f1f5f9;
+            color: #334155;
             font-weight: 600;
-            border-bottom: 1px solid #e2e5ec;
         }
-
         td {
-            padding: 12px 10px;
-            border-bottom: 1px solid #eff0f4;
+            padding: 12px;
+            border-bottom: 1px solid #eef2f6;
         }
-
         .badge {
             display: inline-block;
             padding: 4px 12px;
-            border-radius: 40px;
+            border-radius: 30px;
             font-size: 12px;
             font-weight: 600;
         }
-        .badge.pagado { background: #d9f0e1; color: #1e7b3e; }
-        .badge.pendiente { background: #ffe5e5; color: #d70015; }
-
-        .modal-mac {
+        .badge.pagado { background: #d1fae5; color: #065f46; }
+        .badge.pendiente { background: #fee2e2; color: #991b1b; }
+        .modal {
             display: none;
             position: fixed;
             top: 0; left: 0;
             width: 100%; height: 100%;
             background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
+            backdrop-filter: blur(4px);
             align-items: center;
             justify-content: center;
-            z-index: 10000;
+            z-index: 1000;
         }
-
         .modal-content {
             background: white;
             border-radius: 32px;
-            max-width: 700px;
+            max-width: 500px;
             width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
             padding: 28px;
-            box-shadow: 0 30px 50px rgba(0,0,0,0.3);
         }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            font-size: 22px;
-            font-weight: 600;
-        }
-
-        .close-modal {
-            background: none;
-            font-size: 28px;
-            cursor: pointer;
-            padding: 0 8px;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-            margin-top: 16px;
-        }
-
         @media (max-width: 700px) {
-            .mac-container { padding: 16px; }
-            .mac-tabs { flex-wrap: wrap; }
+            body { padding: 16px; }
+            .panel { padding: 20px; }
+            .tabs { padding: 0 16px; }
         }
     </style>
 </head>
 <body>
 
-<!-- LOGIN SIN PISTA DE CONTRASEÑA -->
+<!-- LOGIN -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
         <h2>🔐 Acceso al Sistema</h2>
         <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="off">
         <button onclick="verificarPassword()">Ingresar</button>
         <div id="loginError" class="error-msg"></div>
-        <!-- ELIMINADO el texto que mostraba la contraseña -->
     </div>
 </div>
 
-<!-- APP PRINCIPAL -->
-<div class="mac-container" id="appContainer">
-    <div class="mac-tabs">
-        <button class="mac-tab active" data-tab="dashboard">📊 Dashboard</button>
-        <button class="mac-tab" data-tab="captura">📝 Capturar venta</button>
-        <button class="mac-tab" data-tab="ventas">📋 Ventas</button>
-        <button class="mac-tab" data-tab="depositos">💰 Depósitos</button>
-        <button class="mac-tab" data-tab="reportes">📈 Reportes</button>
+<!-- ADMIN CONTAINER -->
+<div class="admin-container" id="appContainer">
+    <div class="admin-header">
+        <h1>📊 Admin Ventas Pro</h1>
+        <button class="outline small" onclick="cerrarSesion()">🚪 Salir</button>
     </div>
-
-    <!-- PANEL SUPERIOR CON CRONÓMETRO -->
-    <div class="top-panel">
-        <div class="info-card">
-            <h3>💵 Tipo de Cambio</h3>
-            <div class="cronometro" style="font-size: 24px;">$<span id="displayTC">17.40</span></div>
-            <button class="btn-crono small" onclick="cambiarTC()">✏️ Editar</button>
-        </div>
-        <div class="info-card">
-            <h3>🎉 HORA FELIZ <span style="font-size:12px;">(descuento)</span></h3>
-            <div class="cronometro" id="cronometroDisplay">00:00</div>
-            <div>
-                <button class="btn-crono primary" id="btnIniciarHH">▶️ Iniciar</button>
-                <button class="btn-crono warning" id="btnPausarHH">⏸️ Pausar</button>
-                <button class="btn-crono danger" id="btnResetHH">🔄 Reset</button>
-            </div>
-            <div style="margin-top: 10px;">
-                <label>Descuento: </label>
-                <input type="number" id="descuentoHH" class="descuento-input" step="1" min="0" max="100" value="10"> %
-                <button class="btn-crono small" id="btnAplicarDescuento">Aplicar</button>
-            </div>
-        </div>
-        <div class="info-card">
-            <h3>💰 Comisión</h3>
-            <div class="cronometro" style="font-size: 24px;"><span id="displayComision">10</span>%</div>
-            <button class="btn-crono small" onclick="cambiarComision()">✏️ Editar</button>
-        </div>
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="dashboard">📈 Dashboard</button>
+        <button class="tab-btn" data-tab="captura">📝 Capturar venta</button>
+        <button class="tab-btn" data-tab="ventas">📋 Ventas</button>
+        <button class="tab-btn" data-tab="clientes">👥 Clientes</button>
+        <button class="tab-btn" data-tab="depositos">💰 Depósitos</button>
+        <button class="tab-btn" data-tab="reportes">📊 Reportes</button>
     </div>
 
     <!-- DASHBOARD -->
-    <div id="dashboardPanel" class="panel">
+    <div id="dashboardPanel" class="panel active">
         <div class="stats-grid" id="statsGrid"></div>
-        <div class="card-mac">
-            <h3>📊 Bienvenido</h3>
-            <p>Los datos se sincronizan automáticamente entre todas las pestañas/ventanas abiertas.</p>
+        <div class="card">
+            <div class="card-title">⚙️ Configuración rápida</div>
+            <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                <div><strong>Tipo de cambio:</strong> $<span id="displayTC">17.40</span> <button class="small outline" onclick="cambiarTC()">Editar</button></div>
+                <div><strong>Comisión:</strong> <span id="displayComision">10</span>% <button class="small outline" onclick="cambiarComision()">Editar</button></div>
+                <div><strong>Hora feliz:</strong> <span id="cronometroDisplay">00:00</span> <button class="small primary" id="btnIniciarHH">Iniciar</button> <button class="small warning" id="btnPausarHH">Pausar</button> <button class="small danger" id="btnResetHH">Reset</button> <input type="number" id="descuentoHH" style="width:70px" value="10">% <button class="small" id="btnAplicarDescuento">Aplicar</button></div>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-title">📌 Resumen ejecutivo</div>
+            <p>Control por voz: activa el micrófono y di "siguiente", "precio 50", "guardar", etc.</p>
         </div>
     </div>
 
-    <!-- CAPTURA -->
-    <div id="capturaPanel" class="panel" style="display: none;">
-        <div class="card-mac">
-            <h2>🎯 Nueva venta</h2>
+    <!-- CAPTURA VENTA con botón de micrófono -->
+    <div id="capturaPanel" class="panel">
+        <div class="card">
+            <div class="card-title">🎯 Nueva venta 
+                <button id="btnMicrofono" class="microphone-btn">🎤 Activar micrófono</button>
+                <span id="voiceStatus" class="voice-status">⚪ Micrófono apagado</span>
+            </div>
             <div class="form-grid">
-                <div class="form-group"><label>📅 Fecha</label><input type="date" id="fecha" class="fecha"></div>
+                <div class="form-group"><label>📅 Fecha</label><input type="date" id="fecha"></div>
                 <div class="form-group"><label>🏬 Tienda</label><select id="tienda"></select></div>
                 <div class="form-group"><label>📱 Cliente (4 dígitos)</label><input type="text" id="cliente" maxlength="4" placeholder="1234"></div>
                 <div class="form-group"><label>👤 Shopper</label><select id="shopper"></select></div>
                 <div class="form-group"><label>🔢 Piezas</label><input type="number" id="pzas" value="1" min="1"></div>
                 <div class="form-group"><label>🏷️ Marca</label><select id="marca"></select></div>
-                <div class="form-group"><label>📦 Producto</label><input type="text" id="producto" placeholder="Zapatos"></div>
+                <div class="form-group"><label>📦 Producto</label><input type="text" id="producto"></div>
                 <div class="form-group"><label>📏 Talla</label><input type="text" id="talla"></div>
                 <div class="form-group"><label>💵 Precio USD</label><input type="number" id="precioUSD" step="0.01"></div>
-                <div class="form-group"><label>💰 Depósito inicial MXN</label><input type="number" id="deposito" value="0" step="0.01"></div>
+                <div class="form-group"><label>💰 Depósito MXN</label><input type="number" id="deposito" value="0" step="0.01"></div>
                 <div class="form-group"><label>🏦 Banco</label><select id="banco"><option value="">Sin banco</option><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
                 <div class="form-group"><label>💱 Tipo Cambio</label><input type="number" id="tipoCambio" step="0.01"></div>
             </div>
-            <div class="precio-final" style="background:#f0f4ff; border-radius:20px; padding:15px; margin:15px 0; text-align:center">
-                <strong>💰 Precio final cliente (MXN):</strong> <span id="previewFinal" style="font-size:24px; font-weight:bold;">$0.00</span>
-                <div style="font-size:12px; margin-top:6px;" id="previewDetalle"></div>
+            <div style="background:#f0f9ff; border-radius:20px; padding:15px; text-align:center; margin-bottom:20px">
+                <strong>💰 Precio final MXN:</strong> <span id="previewFinal" style="font-size:26px; font-weight:bold;">$0.00</span>
+                <div id="previewDetalle" style="font-size:12px;"></div>
             </div>
-            <div class="action-buttons">
-                <button class="primary" onclick="agregarVenta(true)">➕ Agregar venta</button>
-                <button class="success" onclick="agregarVenta(false)">⚡ Guardar y nueva</button>
+            <div style="display: flex; gap: 12px;">
+                <button class="primary" id="btnAgregarVenta" onclick="agregarVenta(true)">➕ Agregar venta</button>
+                <button class="success" id="btnGuardarNueva" onclick="agregarVenta(false)">⚡ Guardar y nueva</button>
             </div>
         </div>
     </div>
 
-    <!-- VENTAS -->
-    <div id="ventasPanel" class="panel" style="display: none;">
-        <div class="card-mac">
-            <div style="display: flex; justify-content: space-between; flex-wrap: wrap; gap:12px; margin-bottom: 20px;">
-                <h2>📋 Todas las ventas</h2>
-                <div><button class="success" onclick="exportarExcel()">📥 Exportar Excel</button>
-                <button class="danger" onclick="limpiarTodo()">🗑️ Limpiar todo</button></div>
+    <!-- VENTAS con botón WhatsApp -->
+    <div id="ventasPanel" class="panel">
+        <div class="card">
+            <div class="card-title">📋 Listado de ventas</div>
+            <div style="margin-bottom: 16px; display: flex; gap: 10px;">
+                <button class="success" onclick="exportarExcel()">📥 Exportar Excel</button>
+                <button class="danger" onclick="limpiarTodo()">🗑️ Limpiar todo</button>
             </div>
             <div class="table-wrapper">
-                <table><thead><tr><th>Fecha</th><th>Tienda</th><th>Cliente</th><th>Shopper</th><th>Producto</th><th>Total MXN</th><th>Depósito</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead><tbody id="tbodyVentas"></tbody>
+                <table id="tablaVentas">
+                    <thead><tr><th>Fecha</th><th>Cliente</th><th>Shopper</th><th>Producto</th><th>Total MXN</th><th>Depósito</th><th>Saldo</th><th>Estado</th><th>Acciones</th></tr></thead>
+                    <tbody id="tbodyVentas"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- CLIENTES (registro de WhatsApp + importar Excel) -->
+    <div id="clientesPanel" class="panel">
+        <div class="card">
+            <div class="card-title">📱 Gestionar clientes (4 dígitos → número WhatsApp)</div>
+            <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+                <button class="success" id="btnImportarExcel">📂 Importar clientes desde Excel</button>
+                <input type="file" id="fileExcelInput" accept=".xlsx, .xls, .csv" style="display: none;" />
+            </div>
+            <div class="form-grid">
+                <div class="form-group"><label>Código (4 dígitos)</label><input type="text" id="codigoCliente" maxlength="4" placeholder="Ej: 1234"></div>
+                <div class="form-group"><label>Número WhatsApp completo</label><input type="text" id="whatsappCliente" placeholder="521234567890 (sin +)"></div>
+                <div class="form-group"><label>Nombre (opcional)</label><input type="text" id="nombreCliente"></div>
+            </div>
+            <button class="primary" onclick="guardarCliente()">💾 Guardar cliente</button>
+            <hr style="margin: 20px 0;">
+            <div class="table-wrapper">
+                <table>
+                    <thead><tr><th>Código</th><th>Nombre</th><th>WhatsApp</th><th>Acciones</th></tr></thead>
+                    <tbody id="tbodyClientes"></tbody>
                 </table>
             </div>
         </div>
     </div>
 
     <!-- DEPÓSITOS INDEPENDIENTES -->
-    <div id="depositosPanel" class="panel" style="display: none;">
-        <div class="card-mac">
-            <h2>💰 Registrar depósito sin venta</h2>
+    <div id="depositosPanel" class="panel">
+        <div class="card">
+            <div class="card-title">💰 Depósito sin venta</div>
             <div class="form-grid">
                 <div class="form-group"><label>Fecha</label><input type="date" id="depFecha"></div>
                 <div class="form-group"><label>Tienda</label><select id="depTienda"></select></div>
@@ -460,30 +410,31 @@
                 <div class="form-group"><label>Monto MXN</label><input type="number" id="depMonto" step="0.01"></div>
                 <div class="form-group"><label>Banco</label><select id="depBanco"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
             </div>
-            <button class="primary" onclick="registrarDepositoIndependiente()">✅ Registrar depósito</button>
-            <hr style="margin: 24px 0;">
-            <h3>📜 Depósitos registrados</h3>
-            <div class="table-wrapper"><table><thead><tr><th>Fecha</th><th>Tienda</th><th>Cliente</th><th>Shopper</th><th>Monto</th><th>Banco</th><th></th></tr></thead><tbody id="tbodyDepositosIndep"></tbody></table></div>
+            <button class="primary" onclick="registrarDepositoIndependiente()">Registrar depósito</button>
+            <hr style="margin: 20px 0;">
+            <div class="table-wrapper"></table><thead><tr><th>Fecha</th><th>Cliente</th><th>Shopper</th><th>Monto</th><th>Banco</th><th></th></tr></thead><tbody id="tbodyDepositosIndep"></tbody></table></div>
         </div>
     </div>
 
     <!-- REPORTES -->
-    <div id="reportesPanel" class="panel" style="display: none;">
-        <div class="card-mac">
-            <h2>📊 Resumen por shopper</h2>
-            <div class="table-wrapper"><table><thead><tr><th>Shopper</th><th>Artículos</th><th>USD total</th><th>Total MXN</th><th>Depósitos</th><th>Saldo pendiente</th></tr></thead><tbody id="tbodyReportes"></tbody></table></div>
+    <div id="reportesPanel" class="panel">
+        <div class="card">
+            <div class="card-title">📊 Resumen por shopper</div>
+            <div class="table-wrapper"><table><thead><tr><th>Shopper</th><th>Artículos</th><th>USD</th><th>Total MXN</th><th>Depósitos</th><th>Saldo pendiente</th></tr></thead><tbody id="tbodyReportes"></tbody></table></div>
         </div>
     </div>
 </div>
 
-<!-- MODALES -->
-<div id="editModal" class="modal-mac"><div class="modal-content"><div class="modal-header"><span>✏️ Editar venta</span><span class="close-modal" onclick="cerrarModal()">&times;</span></div><div id="editFormContainer"></div><div class="action-buttons"><button class="primary" id="guardarEdicionBtn">💾 Guardar cambios</button><button onclick="cerrarModal()">Cancelar</button></div></div></div>
-<div id="pagoModal" class="modal-mac"><div class="modal-content" style="max-width:400px"><div class="modal-header">💰 Registrar pago</div><label>Monto adicional (MXN):</label><input type="number" id="montoPago" step="0.01" placeholder="0.00" style="margin:15px 0"><div class="action-buttons"><button class="success" id="confirmarPagoBtn">Aplicar pago</button><button onclick="cerrarModalPago()">Cancelar</button></div></div></div>
+<!-- Modales -->
+<div id="editModal" class="modal"><div class="modal-content"><div style="display:flex; justify-content:space-between;"><span>✏️ Editar venta</span><span class="close-modal" onclick="cerrarModal()">&times;</span></div><div id="editFormContainer"></div><div style="margin-top:20px"><button class="primary" id="guardarEdicionBtn">Guardar</button><button onclick="cerrarModal()">Cancelar</button></div></div></div>
+<div id="pagoModal" class="modal"><div class="modal-content"><h3>💰 Registrar pago</h3><label>Monto adicional MXN:</label><input type="number" id="montoPago" step="0.01" style="margin:15px 0"><div><button class="success" id="confirmarPagoBtn">Aplicar</button><button onclick="cerrarModalPago()">Cancelar</button></div></div></div>
+<div id="whatsappModal" class="modal"><div class="modal-content"><h3 style="margin-bottom:15px;">📲 Enviar total por WhatsApp</h3><p id="modalClienteInfo"></p><p><strong>Total a pagar:</strong> $<span id="modalTotalPagar">0.00</span></p><label>Número WhatsApp (con código país):</label><input type="text" id="modalWhatsappNum" placeholder="521234567890"><div style="margin-top:20px; display:flex; gap:10px;"><button class="success" id="confirmarEnvioWhatsapp">📤 Enviar mensaje</button><button onclick="cerrarModalWhatsapp()">Cancelar</button></div></div></div>
 
 <script>
     // -------------------- DATOS GLOBALES --------------------
     let ventas = [];
     let depositosIndep = [];
+    let clientes = [];
     let tcGlobal = 17.40;
     let comisionGlobal = 10;
     let happyHour = { activa: false, descuento: 10 };
@@ -499,37 +450,26 @@
 
     let editIndex = null;
     let pagoIndex = null;
+    let currentClienteEnvio = null;
 
-    // ---------- LOGIN (sin texto de clave) ----------
-    function verificarPassword() {
-        let pass = document.getElementById("loginPassword").value;
-        if(pass === "admin123") {
-            document.getElementById("loginOverlay").style.display = "none";
-            document.getElementById("appContainer").style.display = "block";
-            cargarDatos();
-            inicializarCronometroDesdeStorage();
-            actualizarTodo();
-            iniciarSincronizacion();
-        } else {
-            document.getElementById("loginError").innerText = "Contraseña incorrecta";
+    // ---------- RECONOCIMIENTO DE VOZ ----------
+    let recognition = null;
+    let listening = false;
+    let camposFormulario = [];
+    
+    function iniciarReconocimientoVoz() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.");
+            return false;
         }
-    }
-
-    function iniciarSincronizacion() {
-        window.addEventListener('storage', (e) => {
-            if (e.key === 'ventas_sistema' || e.key === 'depositos_sistema') {
-                cargarDatos();
-                actualizarTodo();
-            }
-            if (e.key === 'cronometro_sistema') {
-                let data = JSON.parse(e.newValue);
-                if (data) {
-                    cronometroActivo = data.activo;
-                    cronometroSegundos = data.segundos;
-                    actualizarDisplayCronometro();
-                    if (cronometroActivo) iniciarIntervaloCronometro();
-                    else detenerIntervaloCronometro();
-                    happyHour.activa = cronometroActivo;
-                }
-            }
-            if (e.key === 'happyHourDes
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = true;  // escucha continua
+        recognition.interimResults = false;
+        recognition.lang = 'es-ES';
+        
+        recognition.onstart = () => {
+            listening = true;
+            document.getElementById("btnMicrofono").innerHTML = "🎤 Desactivar micrófono";
+            document.getElementById("btnMicrofono").classList.add("listening");
+            
