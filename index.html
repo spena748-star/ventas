@@ -305,4 +305,539 @@
     }
 
     function obtenerCamposFormulario() {
-        co
+        const contenedor = document.querySelector("#capturaPanel .form-grid");
+        if (!contenedor) return [];
+        return Array.from(contenedor.querySelectorAll("input, select"));
+    }
+
+    function siguienteCampo() {
+        const campos = obtenerCamposFormulario();
+        const active = document.activeElement;
+        let index = campos.findIndex(campo => campo === active);
+        let nextIndex = (index + 1) % campos.length;
+        campos[nextIndex].focus();
+        document.getElementById("voiceStatus").innerHTML = `🎙️ Saltó al campo ${nextIndex+1}`;
+        setTimeout(() => { if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando..."; }, 1500);
+    }
+
+    function procesarComandoVoz(texto) {
+        document.getElementById("voiceStatus").innerHTML = `🎙️ Comando: "${texto}"`;
+        setTimeout(() => { if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando..."; }, 2000);
+        
+        if (texto === "siguiente" || texto === "siguiente campo") { siguienteCampo(); return; }
+        if (texto === "guardar" || texto === "agregar venta") { document.getElementById("btnAgregarVenta").click(); return; }
+        if (texto === "guardar y nueva") { document.getElementById("btnGuardarNueva").click(); return; }
+        
+        let match = texto.match(/precio\s+(\d+(?:\.\d+)?)/);
+        if (match) { document.getElementById("precioUSD").value = parseFloat(match[1]); actualizarPreview(); return; }
+        match = texto.match(/depósito\s+(\d+(?:\.\d+)?)/);
+        if (match) { document.getElementById("deposito").value = parseFloat(match[1]); actualizarPreview(); return; }
+        match = texto.match(/piezas?\s+(\d+)/);
+        if (match) { document.getElementById("pzas").value = parseInt(match[1]); return; }
+        match = texto.match(/cliente\s+(\d{4})/);
+        if (match) { document.getElementById("cliente").value = match[1]; return; }
+        match = texto.match(/talla\s+(\w+)/);
+        if (match) { document.getElementById("talla").value = match[1]; return; }
+        match = texto.match(/producto\s+(.+)/);
+        if (match) { document.getElementById("producto").value = match[1]; return; }
+        for (let m of marcas) {
+            if (texto.includes(m.toLowerCase())) { document.getElementById("marca").value = m; return; }
+        }
+    }
+
+    // ---------- LOGIN ----------
+    document.getElementById("btnLogin").onclick = () => {
+        const pass = document.getElementById("loginPassword").value;
+        if (pass === "1234") {
+            document.getElementById("loginOverlay").style.display = "none";
+            document.getElementById("appContainer").style.display = "block";
+            cargarDatos();
+            inicializarCronometro();
+            actualizarTodo();
+            iniciarSincronizacion();
+        } else {
+            document.getElementById("loginError").innerText = "Contraseña incorrecta. Prueba con 1234";
+        }
+    };
+    document.getElementById("btnSalir").onclick = () => {
+        detenerReconocimiento();
+        document.getElementById("loginOverlay").style.display = "flex";
+        document.getElementById("appContainer").style.display = "none";
+    };
+
+    // ---------- CATÁLOGOS (Tiendas y Shoppers) ----------
+    function guardarCatalogos() {
+        localStorage.setItem("tiendas_sistema", JSON.stringify(tiendas));
+        localStorage.setItem("shoppers_sistema", JSON.stringify(shoppers));
+    }
+
+    function cargarCatalogos() {
+        let storedTiendas = localStorage.getItem("tiendas_sistema");
+        if (storedTiendas) tiendas = JSON.parse(storedTiendas);
+        else tiendas = ["CDMX", "GDL", "MTY"];
+        
+        let storedShoppers = localStorage.getItem("shoppers_sistema");
+        if (storedShoppers) shoppers = JSON.parse(storedShoppers);
+        else shoppers = ["Ana", "Luis", "Martha"];
+    }
+
+    function agregarTienda() {
+        let nueva = document.getElementById("nuevaTienda").value.trim();
+        if (nueva === "") { alert("Escribe un nombre para la tienda"); return; }
+        if (tiendas.includes(nueva)) { alert("La tienda ya existe"); return; }
+        tiendas.push(nueva);
+        guardarCatalogos();
+        actualizarSelectoresTienda();
+        mostrarCatalogosUI();
+        document.getElementById("nuevaTienda").value = "";
+    }
+
+    function eliminarTienda(index) {
+        if (tiendas.length <= 1) { alert("Debe haber al menos una tienda"); return; }
+        tiendas.splice(index, 1);
+        guardarCatalogos();
+        actualizarSelectoresTienda();
+        mostrarCatalogosUI();
+    }
+
+    function agregarShopper() {
+        let nuevo = document.getElementById("nuevoShopper").value.trim();
+        if (nuevo === "") { alert("Escribe un nombre para el shopper"); return; }
+        if (shoppers.includes(nuevo)) { alert("El shopper ya existe"); return; }
+        shoppers.push(nuevo);
+        guardarCatalogos();
+        actualizarSelectoresShopper();
+        mostrarCatalogosUI();
+        document.getElementById("nuevoShopper").value = "";
+    }
+
+    function eliminarShopper(index) {
+        if (shoppers.length <= 1) { alert("Debe haber al menos un shopper"); return; }
+        shoppers.splice(index, 1);
+        guardarCatalogos();
+        actualizarSelectoresShopper();
+        mostrarCatalogosUI();
+    }
+
+    function actualizarSelectoresTienda() {
+        const selects = ["tienda", "depTienda"];
+        selects.forEach(id => {
+            let select = document.getElementById(id);
+            if (select) {
+                let valorActual = select.value;
+                select.innerHTML = "";
+                tiendas.forEach(t => {
+                    let option = new Option(t, t);
+                    select.add(option);
+                });
+                if (tiendas.includes(valorActual)) select.value = valorActual;
+                else select.value = tiendas[0];
+            }
+        });
+    }
+
+    function actualizarSelectoresShopper() {
+        const selects = ["shopper", "depShopper"];
+        selects.forEach(id => {
+            let select = document.getElementById(id);
+            if (select) {
+                let valorActual = select.value;
+                select.innerHTML = "";
+                shoppers.forEach(s => {
+                    let option = new Option(s, s);
+                    select.add(option);
+                });
+                if (shoppers.includes(valorActual)) select.value = valorActual;
+                else select.value = shoppers[0];
+            }
+        });
+    }
+
+    function mostrarCatalogosUI() {
+        const contTiendas = document.getElementById("listaTiendas");
+        const contShoppers = document.getElementById("listaShoppers");
+        if (!contTiendas || !contShoppers) return;
+        
+        contTiendas.innerHTML = "";
+        tiendas.forEach((t, idx) => {
+            let span = document.createElement("span");
+            span.className = "catalogo-item";
+            span.innerHTML = `${t} <button class="small danger" style="padding:2px 8px;" data-idx="${idx}">✖</button>`;
+            span.querySelector("button").onclick = () => eliminarTienda(idx);
+            contTiendas.appendChild(span);
+        });
+        
+        contShoppers.innerHTML = "";
+        shoppers.forEach((s, idx) => {
+            let span = document.createElement("span");
+            span.className = "catalogo-item";
+            span.innerHTML = `${s} <button class="small danger" style="padding:2px 8px;" data-idx="${idx}">✖</button>`;
+            span.querySelector("button").onclick = () => eliminarShopper(idx);
+            contShoppers.appendChild(span);
+        });
+    }
+
+    // ---------- Sincronización entre pestañas ----------
+    function iniciarSincronizacion() {
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'ventas_sistema') { cargarVentas(); actualizarTodo(); }
+            if (e.key === 'depositos_sistema') { cargarDepositos(); actualizarTodo(); }
+            if (e.key === 'clientes_sistema') { cargarClientes(); mostrarClientes(); }
+            if (e.key === 'tiendas_sistema') { cargarCatalogos(); actualizarSelectoresTienda(); mostrarCatalogosUI(); }
+            if (e.key === 'shoppers_sistema') { cargarCatalogos(); actualizarSelectoresShopper(); mostrarCatalogosUI(); actualizarReportes(); }
+            if (e.key === 'cronometro_sistema') {
+                let data = JSON.parse(e.newValue);
+                if (data) { cronometroActivo = data.activo; cronometroSegundos = data.segundos; actualizarDisplayCronometro(); if(cronometroActivo) iniciarIntervalo(); else detenerIntervalo(); happyHour.activa = cronometroActivo; actualizarPreview(); }
+            }
+            if (e.key === 'happyHourDescuento_sistema') { happyHour.descuento = parseFloat(e.newValue); document.getElementById("descuentoHH").value = happyHour.descuento; actualizarPreview(); }
+            if (e.key === 'tc_sistema') { tcGlobal = parseFloat(e.newValue); actualizarUI(); }
+            if (e.key === 'comision_sistema') { comisionGlobal = parseFloat(e.newValue); actualizarUI(); }
+        });
+    }
+
+    function guardarTodo() {
+        localStorage.setItem("ventas_sistema", JSON.stringify(ventas));
+        localStorage.setItem("depositos_sistema", JSON.stringify(depositosIndep));
+        localStorage.setItem("clientes_sistema", JSON.stringify(clientes));
+        localStorage.setItem("tc_sistema", tcGlobal);
+        localStorage.setItem("comision_sistema", comisionGlobal);
+        localStorage.setItem("happyHourDescuento_sistema", happyHour.descuento);
+        guardarCronometro();
+        guardarCatalogos(); // también guarda tiendas y shoppers
+    }
+
+    function guardarCronometro() { localStorage.setItem("cronometro_sistema", JSON.stringify({activo:cronometroActivo, segundos:cronometroSegundos})); }
+    function cargarVentas() { let v = localStorage.getItem("ventas_sistema"); if(v) ventas = JSON.parse(v); else ventas = []; if(ventas.length) nextId = Math.max(...ventas.map(v=>v.id)) + 1; else nextId=1; }
+    function cargarDepositos() { let d = localStorage.getItem("depositos_sistema"); if(d) depositosIndep = JSON.parse(d); else depositosIndep = []; }
+    function cargarClientes() { let c = localStorage.getItem("clientes_sistema"); if(c) clientes = JSON.parse(c); else clientes = []; }
+    function cargarDatos() { cargarVentas(); cargarDepositos(); cargarClientes(); cargarCatalogos(); let tc = localStorage.getItem("tc_sistema"); if(tc) tcGlobal = parseFloat(tc); let com = localStorage.getItem("comision_sistema"); if(com) comisionGlobal = parseFloat(com); let desc = localStorage.getItem("happyHourDescuento_sistema"); if(desc) happyHour.descuento = parseFloat(desc); }
+
+    // CRONÓMETRO
+    function inicializarCronometro() {
+        let stored = localStorage.getItem("cronometro_sistema");
+        if(stored) { let data = JSON.parse(stored); cronometroActivo = data.activo; cronometroSegundos = data.segundos; actualizarDisplayCronometro(); if(cronometroActivo) iniciarIntervalo(); else detenerIntervalo(); happyHour.activa = cronometroActivo; }
+        else { cronometroActivo=false; cronometroSegundos=0; actualizarDisplayCronometro(); happyHour.activa=false; }
+        document.getElementById("descuentoHH").value = happyHour.descuento;
+    }
+    function actualizarDisplayCronometro() { let m=Math.floor(cronometroSegundos/60), s=cronometroSegundos%60; document.getElementById("cronometroDisplay").innerText = `${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`; }
+    function iniciarIntervalo() { if(cronometroInterval) clearInterval(cronometroInterval); cronometroInterval = setInterval(()=>{ if(cronometroActivo){ cronometroSegundos++; actualizarDisplayCronometro(); guardarCronometro(); } },1000); }
+    function detenerIntervalo() { if(cronometroInterval){ clearInterval(cronometroInterval); cronometroInterval=null; } }
+    function iniciarCronometro() { if(cronometroActivo) return; cronometroActivo=true; happyHour.activa=true; iniciarIntervalo(); guardarCronometro(); actualizarPreview(); }
+    function pausarCronometro() { if(!cronometroActivo) return; cronometroActivo=false; happyHour.activa=false; detenerIntervalo(); guardarCronometro(); actualizarPreview(); }
+    function resetCronometro() { pausarCronometro(); cronometroSegundos=0; actualizarDisplayCronometro(); guardarCronometro(); actualizarPreview(); }
+    function aplicarDescuento() { let d=parseFloat(document.getElementById("descuentoHH").value); if(isNaN(d)) d=0; d=Math.min(100,Math.max(0,d)); happyHour.descuento=d; localStorage.setItem("happyHourDescuento_sistema",d); actualizarPreview(); }
+    function cambiarTC() { let n=prompt("Nuevo tipo de cambio",tcGlobal); if(n && !isNaN(parseFloat(n))){ tcGlobal=parseFloat(n); localStorage.setItem("tc_sistema",tcGlobal); actualizarUI(); } }
+    function cambiarComision() { let n=prompt("Nueva comisión (%)",comisionGlobal); if(n && !isNaN(parseFloat(n))){ comisionGlobal=parseFloat(n); localStorage.setItem("comision_sistema",comisionGlobal); actualizarUI(); } }
+
+    // Cálculos
+    function calcularTotalMXN(precioUSD, tc) { let base=precioUSD*tc; let com=base*(comisionGlobal/100); let total=base+com; if(happyHour.activa) total*=(1-happyHour.descuento/100); return total; }
+    function actualizarPreview() {
+        let pUSD=parseFloat(document.getElementById("precioUSD").value)||0;
+        let tc=parseFloat(document.getElementById("tipoCambio").value)||tcGlobal;
+        let total=calcularTotalMXN(pUSD,tc);
+        document.getElementById("previewFinal").innerText=`$${total.toFixed(2)}`;
+        let detalle=`USD ${pUSD} × TC ${tc} = ${(pUSD*tc).toFixed(2)} + comisión ${comisionGlobal}% = ${(pUSD*tc*(1+comisionGlobal/100)).toFixed(2)}`;
+        if(happyHour.activa) detalle+=` - HH ${happyHour.descuento}% = ${total.toFixed(2)}`;
+        document.getElementById("previewDetalle").innerText=detalle;
+    }
+
+    // Agregar venta
+    function agregarVenta(limpiar) {
+        let fecha=document.getElementById("fecha").value, tienda=document.getElementById("tienda").value, cliente=document.getElementById("cliente").value.trim(), shopper=document.getElementById("shopper").value;
+        let pzas=parseInt(document.getElementById("pzas").value)||1, marca=document.getElementById("marca").value, producto=document.getElementById("producto").value, talla=document.getElementById("talla").value;
+        let precioUSD=parseFloat(document.getElementById("precioUSD").value)||0, deposito=parseFloat(document.getElementById("deposito").value)||0, banco=document.getElementById("banco").value;
+        let tcUsado=parseFloat(document.getElementById("tipoCambio").value)||tcGlobal;
+        if(!fecha||!tienda||!cliente||!shopper||!producto||precioUSD<=0){ alert("Complete campos obligatorios"); return; }
+        let totalMXN=calcularTotalMXN(precioUSD,tcUsado);
+        let venta={id:nextId++, fecha, tienda, cliente, shopper, pzas, marca, producto, talla, precioUSD, deposito, banco, tcUsado, totalMXN, saldo:totalMXN-deposito};
+        ventas.push(venta);
+        guardarTodo();
+        if(limpiar){
+            document.getElementById("cliente").value=""; document.getElementById("producto").value=""; document.getElementById("talla").value="";
+            document.getElementById("precioUSD").value=""; document.getElementById("deposito").value="0"; document.getElementById("pzas").value="1";
+            actualizarPreview();
+        }
+        actualizarTodo();
+        if(!limpiar) actualizarPreview();
+        mostrarTab('ventas');
+    }
+
+    // Mostrar ventas
+    function mostrarVentas() {
+        let tbody=document.getElementById("tbodyVentas"); tbody.innerHTML="";
+        ventas.forEach((v,idx)=>{
+            let estado=v.saldo<=0?"Pagado":"Pendiente";
+            let badge=`<span class="badge ${estado==='Pagado'?'pagado':'pendiente'}">${estado}</span>`;
+            let row=tbody.insertRow();
+            row.insertCell(0).innerText=v.fecha;
+            row.insertCell(1).innerText=v.cliente;
+            row.insertCell(2).innerText=v.shopper;
+            row.insertCell(3).innerText=`${v.marca} ${v.producto} ${v.talla} (x${v.pzas})`;
+            row.insertCell(4).innerText=`$${v.totalMXN.toFixed(2)}`;
+            row.insertCell(5).innerText=`$${v.deposito.toFixed(2)}`;
+            row.insertCell(6).innerHTML=v.saldo>0?`<span style="color:#ef4444;">$${v.saldo.toFixed(2)}</span>`:`$${v.saldo.toFixed(2)}`;
+            row.insertCell(7).innerHTML=badge;
+            let acc=document.createElement("div"); acc.style.display="flex"; acc.style.gap="6px";
+            let btnEditar=document.createElement("button"); btnEditar.innerText="✏️"; btnEditar.className="small outline"; btnEditar.onclick=()=>abrirEditar(idx);
+            let btnPagar=document.createElement("button"); btnPagar.innerText="💵"; btnPagar.className="small success"; btnPagar.onclick=()=>abrirPago(idx);
+            let btnCancelar=document.createElement("button"); btnCancelar.innerText="🗑️"; btnCancelar.className="small danger"; btnCancelar.onclick=()=>eliminarVenta(idx);
+            let btnWhatsapp=document.createElement("button"); btnWhatsapp.innerText="📲"; btnWhatsapp.className="small primary"; btnWhatsapp.onclick=()=>abrirEnvioWhatsapp(v.cliente);
+            acc.appendChild(btnEditar); acc.appendChild(btnPagar); acc.appendChild(btnCancelar); acc.appendChild(btnWhatsapp);
+            row.insertCell(8).appendChild(acc);
+        });
+    }
+
+    function eliminarVenta(idx){ if(confirm("¿Cancelar esta venta?")){ ventas.splice(idx,1); guardarTodo(); actualizarTodo(); } }
+    function abrirEditar(idx){
+        editIndex=idx; let v=ventas[idx];
+        let html=`<div class="form-grid">
+            <div class="form-group"><label>Fecha</label><input type="date" id="editFecha" value="${v.fecha}"></div>
+            <div class="form-group"><label>Tienda</label><select id="editTienda">${tiendas.map(t=>`<option ${t===v.tienda?'selected':''}>${t}</option>`).join('')}</select></div>
+            <div class="form-group"><label>Cliente</label><input type="text" id="editCliente" value="${v.cliente}" maxlength="4"></div>
+            <div class="form-group"><label>Shopper</label><select id="editShopper">${shoppers.map(s=>`<option ${s===v.shopper?'selected':''}>${s}</option>`).join('')}</select></div>
+            <div class="form-group"><label>Piezas</label><input type="number" id="editPzas" value="${v.pzas}" min="1"></div>
+            <div class="form-group"><label>Marca</label><select id="editMarca">${marcas.map(m=>`<option ${m===v.marca?'selected':''}>${m}</option>`).join('')}<option value="">Otra</option></select></div>
+            <div class="form-group"><label>Producto</label><input type="text" id="editProducto" value="${v.producto}"></div>
+            <div class="form-group"><label>Talla</label><input type="text" id="editTalla" value="${v.talla}"></div>
+            <div class="form-group"><label>Precio USD</label><input type="number" id="editPrecioUSD" step="0.01" value="${v.precioUSD}"></div>
+            <div class="form-group"><label>Depósito</label><input type="number" id="editDeposito" step="0.01" value="${v.deposito}"></div>
+            <div class="form-group"><label>Banco</label><input type="text" id="editBanco" value="${v.banco}"></div>
+            <div class="form-group"><label>Tipo Cambio</label><input type="number" id="editTc" step="0.01" value="${v.tcUsado}"></div>
+        </div>`;
+        document.getElementById("editFormContainer").innerHTML=html;
+        document.getElementById("editModal").style.display="flex";
+        document.getElementById("guardarEdicionBtn").onclick=()=>guardarEdicion();
+    }
+    function guardarEdicion(){
+        if(editIndex===null) return;
+        let v=ventas[editIndex];
+        v.fecha=document.getElementById("editFecha").value; v.tienda=document.getElementById("editTienda").value; v.cliente=document.getElementById("editCliente").value; v.shopper=document.getElementById("editShopper").value;
+        v.pzas=parseInt(document.getElementById("editPzas").value)||1; v.marca=document.getElementById("editMarca").value; v.producto=document.getElementById("editProducto").value; v.talla=document.getElementById("editTalla").value;
+        v.precioUSD=parseFloat(document.getElementById("editPrecioUSD").value)||0; v.deposito=parseFloat(document.getElementById("editDeposito").value)||0; v.banco=document.getElementById("editBanco").value;
+        v.tcUsado=parseFloat(document.getElementById("editTc").value)||tcGlobal;
+        v.totalMXN=calcularTotalMXN(v.precioUSD,v.tcUsado); v.saldo=v.totalMXN-v.deposito;
+        guardarTodo(); cerrarModal(); actualizarTodo();
+    }
+    function abrirPago(idx){
+        pagoIndex=idx; document.getElementById("pagoModal").style.display="flex"; document.getElementById("montoPago").value="";
+        document.getElementById("confirmarPagoBtn").onclick=()=>{
+            let monto=parseFloat(document.getElementById("montoPago").value);
+            if(isNaN(monto)||monto<=0){ alert("Monto válido >0"); return; }
+            ventas[pagoIndex].deposito+=monto; ventas[pagoIndex].saldo=ventas[pagoIndex].totalMXN-ventas[pagoIndex].deposito;
+            guardarTodo(); cerrarModalPago(); actualizarTodo();
+        };
+    }
+    function cerrarModal(){ document.getElementById("editModal").style.display="none"; editIndex=null; }
+    function cerrarModalPago(){ document.getElementById("pagoModal").style.display="none"; pagoIndex=null; }
+
+    // Clientes
+    function guardarCliente(){
+        let codigo=document.getElementById("codigoCliente").value.trim();
+        let whatsapp=document.getElementById("whatsappCliente").value.trim();
+        let nombre=document.getElementById("nombreCliente").value.trim();
+        if(!codigo || !whatsapp){ alert("Código y número WhatsApp son obligatorios"); return; }
+        let existente=clientes.findIndex(c=>c.codigo===codigo);
+        if(existente>=0) clientes[existente]={codigo, whatsapp, nombre};
+        else clientes.push({codigo, whatsapp, nombre});
+        guardarTodo();
+        mostrarClientes();
+        document.getElementById("codigoCliente").value=""; document.getElementById("whatsappCliente").value=""; document.getElementById("nombreCliente").value="";
+    }
+
+    async function importarClientesDesdeExcel(file) {
+        if(typeof XLSX === 'undefined') await import('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const rows = XLSX.utils.sheet_to_json(sheet, { header: 1, defval: "" });
+        if(!rows || rows.length < 2) { alert("El archivo no contiene datos"); return; }
+        let header = rows[0].map(cell => String(cell).toLowerCase().trim());
+        let idxCodigo = header.findIndex(h => h.includes('codigo') || h.includes('código') || h === 'id' || h === 'cliente');
+        let idxWhatsapp = header.findIndex(h => h.includes('whatsapp') || h.includes('telefono') || h.includes('teléfono') || h === 'whatsapp');
+        let idxNombre = header.findIndex(h => h.includes('nombre') || h === 'name');
+        if(idxCodigo === -1) idxCodigo = 0;
+        if(idxWhatsapp === -1) idxWhatsapp = 1;
+        if(idxNombre === -1) idxNombre = 2;
+        let importados = 0;
+        for(let i=1; i<rows.length; i++) {
+            let codigo = String(rows[i][idxCodigo] || "").trim();
+            let whatsapp = String(rows[i][idxWhatsapp] || "").trim();
+            let nombre = String(rows[i][idxNombre] || "").trim();
+            if(codigo && whatsapp) {
+                let existente = clientes.findIndex(c => c.codigo === codigo);
+                if(existente >= 0) clientes[existente] = { codigo, whatsapp, nombre };
+                else clientes.push({ codigo, whatsapp, nombre });
+                importados++;
+            }
+        }
+        if(importados > 0) {
+            guardarTodo();
+            mostrarClientes();
+            alert(`Se importaron/actualizaron ${importados} clientes.`);
+        } else { alert("No se encontraron clientes válidos"); }
+    }
+
+    function mostrarClientes(){
+        let tbody=document.getElementById("tbodyClientes"); tbody.innerHTML="";
+        clientes.forEach((c,idx)=>{
+            let row=tbody.insertRow();
+            row.insertCell(0).innerText=c.codigo;
+            row.insertCell(1).innerText=c.nombre||'';
+            row.insertCell(2).innerText=c.whatsapp;
+            let btn=document.createElement("button"); btn.innerText="🗑️"; btn.className="small danger"; btn.onclick=()=>{ clientes.splice(idx,1); guardarTodo(); mostrarClientes(); };
+            row.insertCell(3).appendChild(btn);
+        });
+    }
+
+    // Depósitos independientes
+    function registrarDepositoIndependiente(){
+        let fecha=document.getElementById("depFecha").value, tienda=document.getElementById("depTienda").value, cliente=document.getElementById("depCliente").value, shopper=document.getElementById("depShopper").value;
+        let monto=parseFloat(document.getElementById("depMonto").value), banco=document.getElementById("depBanco").value;
+        if(!fecha||!tienda||!cliente||!shopper||monto<=0){ alert("Complete todos los campos"); return; }
+        depositosIndep.push({fecha,tienda,cliente,shopper,monto,banco}); guardarTodo();
+        document.getElementById("depCliente").value=""; document.getElementById("depMonto").value=""; actualizarTodo();
+    }
+    function mostrarDepositosIndep(){
+        let tbody=document.getElementById("tbodyDepositosIndep"); tbody.innerHTML="";
+        depositosIndep.forEach((d,idx)=>{
+            let row=tbody.insertRow();
+            row.insertCell(0).innerText=d.fecha; row.insertCell(1).innerText=d.cliente; row.insertCell(2).innerText=d.shopper;
+            row.insertCell(3).innerText=`$${d.monto.toFixed(2)}`; row.insertCell(4).innerText=d.banco;
+            let btn=document.createElement("button"); btn.innerText="🗑️"; btn.className="small danger"; btn.onclick=()=>{ depositosIndep.splice(idx,1); guardarTodo(); actualizarTodo(); };
+            row.insertCell(5).appendChild(btn);
+        });
+    }
+
+    function actualizarStats(){
+        let arts=ventas.reduce((s,v)=>s+v.pzas,0), usd=ventas.reduce((s,v)=>s+v.precioUSD*v.pzas,0), mxn=ventas.reduce((s,v)=>s+v.totalMXN,0), dep=ventas.reduce((s,v)=>s+v.deposito,0);
+        let saldo=mxn-dep, depIndep=depositosIndep.reduce((s,d)=>s+d.monto,0), clientesUnicos=new Set(ventas.map(v=>v.cliente)).size;
+        document.getElementById("statsGrid").innerHTML=`
+            <div class="stat-card"><h4>📦 Artículos</h4><div class="value">${arts}</div></div>
+            <div class="stat-card"><h4>💰 USD</h4><div class="value">$${usd.toFixed(2)}</div></div>
+            <div class="stat-card"><h4>💵 MXN</h4><div class="value">$${mxn.toFixed(2)}</div></div>
+            <div class="stat-card"><h4>🏦 Depósitos</h4><div class="value">$${dep.toFixed(2)}</div></div>
+            <div class="stat-card"><h4>⚠️ Saldo</h4><div class="value">$${saldo.toFixed(2)}</div></div>
+            <div class="stat-card"><h4>👥 Clientes</h4><div class="value">${clientesUnicos}</div></div>
+            <div class="stat-card"><h4>💸 Depósitos indep.</h4><div class="value">$${depIndep.toFixed(2)}</div></div>
+        `;
+    }
+    function actualizarReportes(){
+        let res={};
+        ventas.forEach(v=>{ if(!res[v.shopper]) res[v.shopper]={articulos:0,usd:0,mxn:0,dep:0}; res[v.shopper].articulos+=v.pzas; res[v.shopper].usd+=v.precioUSD*v.pzas; res[v.shopper].mxn+=v.totalMXN; res[v.shopper].dep+=v.deposito; });
+        let tbody=document.getElementById("tbodyReportes"); tbody.innerHTML="";
+        for(let sh in res){ let r=res[sh]; let pend=r.mxn-r.dep; let row=tbody.insertRow(); row.insertCell(0).innerText=sh; row.insertCell(1).innerText=r.articulos; row.insertCell(2).innerText=`$${r.usd.toFixed(2)}`; row.insertCell(3).innerText=`$${r.mxn.toFixed(2)}`; row.insertCell(4).innerText=`$${r.dep.toFixed(2)}`; row.insertCell(5).innerHTML=pend>0?`<span style="color:#ef4444;">$${pend.toFixed(2)}</span>`:`$${pend.toFixed(2)}`; }
+    }
+
+    // WhatsApp
+    function abrirEnvioWhatsapp(codigoCliente) {
+        let ventasCliente = ventas.filter(v => v.cliente === codigoCliente);
+        let totalPendiente = ventasCliente.reduce((sum, v) => sum + (v.saldo > 0 ? v.saldo : 0), 0);
+        if(totalPendiente === 0) { alert("Este cliente no tiene saldo pendiente"); return; }
+        let clienteInfo = clientes.find(c => c.codigo === codigoCliente);
+        let numeroWhatsapp = clienteInfo ? clienteInfo.whatsapp : "";
+        document.getElementById("modalClienteInfo").innerHTML = `Cliente: ${codigoCliente} ${clienteInfo ? `(${clienteInfo.nombre})` : ''}`;
+        document.getElementById("modalTotalPagar").innerText = totalPendiente.toFixed(2);
+        document.getElementById("modalWhatsappNum").value = numeroWhatsapp;
+        currentClienteEnvio = codigoCliente;
+        document.getElementById("whatsappModal").style.display = "flex";
+        document.getElementById("confirmarEnvioWhatsapp").onclick = () => enviarWhatsapp(currentClienteEnvio);
+    }
+    function enviarWhatsapp(codigoCliente) {
+        let numero = document.getElementById("modalWhatsappNum").value.trim();
+        if(!numero) { alert("Ingrese número de WhatsApp"); return; }
+        let ventasCliente = ventas.filter(v => v.cliente === codigoCliente);
+        let totalPendiente = ventasCliente.reduce((sum, v) => sum + (v.saldo > 0 ? v.saldo : 0), 0);
+        let mensaje = `*Resumen de compras*\nCliente: ${codigoCliente}\n\n`;
+        ventasCliente.forEach(v => {
+            if(v.saldo > 0) mensaje += `📦 ${v.marca} ${v.producto} - Total: $${v.totalMXN.toFixed(2)} | Pagado: $${v.deposito.toFixed(2)} | Saldo: $${v.saldo.toFixed(2)}\n`;
+        });
+        mensaje += `\n*Total a pagar: $${totalPendiente.toFixed(2)}*\nGracias por tu compra.`;
+        let url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+        cerrarModalWhatsapp();
+    }
+    function cerrarModalWhatsapp() { document.getElementById("whatsappModal").style.display = "none"; currentClienteEnvio = null; }
+
+    // Exportar Excel
+    async function exportarExcel(){
+        if(ventas.length===0 && depositosIndep.length===0){ alert("Sin datos"); return; }
+        if(typeof XLSX === 'undefined') await import('https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js');
+        let wb = XLSX.utils.book_new();
+        let shopers = [...new Set(ventas.map(v=>v.shopper))];
+        for(let sh of shopers){
+            let ventasSh = ventas.filter(v=>v.shopper===sh);
+            let clientesMap = new Map();
+            ventasSh.forEach(v=>{ if(!clientesMap.has(v.cliente)) clientesMap.set(v.cliente,[]); clientesMap.get(v.cliente).push(v); });
+            let filas = [];
+            for(let [cliente, compras] of clientesMap.entries()){
+                filas.push({"CLIENTE":cliente, "Producto":"","Pzas":"","Precio USD":"","Total MXN":"","Depósito":"","Saldo":""});
+                compras.forEach(c=>{ filas.push({"CLIENTE":"","Producto":`${c.marca} ${c.producto} ${c.talla}`, "Pzas":c.pzas, "Precio USD":c.precioUSD, "Total MXN":c.totalMXN, "Depósito":c.deposito, "Saldo":c.saldo}); });
+                let totCli=compras.reduce((s,c)=>s+c.totalMXN,0), depCli=compras.reduce((s,c)=>s+c.deposito,0);
+                filas.push({"CLIENTE":"SUBTOTAL CLIENTE","Producto":"","Pzas":"","Precio USD":"","Total MXN":totCli,"Depósito":depCli,"Saldo":totCli-depCli});
+                filas.push({});
+            }
+            let totalSh=ventasSh.reduce((s,v)=>s+v.totalMXN,0), depSh=ventasSh.reduce((s,v)=>s+v.deposito,0);
+            filas.push({"CLIENTE":`TOTAL ${sh}`,"Producto":"","Pzas":"","Precio USD":"","Total MXN":totalSh,"Depósito":depSh,"Saldo":totalSh-depSh});
+            let hoja = XLSX.utils.json_to_sheet(filas, {header:["CLIENTE","Producto","Pzas","Precio USD","Total MXN","Depósito","Saldo"]});
+            XLSX.utils.book_append_sheet(wb, hoja, sh.substring(0,31));
+        }
+        if(depositosIndep.length){
+            let depSheet = XLSX.utils.json_to_sheet(depositosIndep.map(d=>({Fecha:d.fecha,Tienda:d.tienda,Cliente:d.cliente,Shopper:d.shopper,Monto:d.monto,Banco:d.banco})));
+            XLSX.utils.book_append_sheet(wb, depSheet, "Depósitos_Independientes");
+        }
+        XLSX.writeFile(wb, `ventas_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    function limpiarTodo(){ if(confirm("⚠️ Eliminar TODAS las ventas y depósitos?")){ ventas=[]; depositosIndep=[]; guardarTodo(); actualizarTodo(); } }
+
+    // UI Helpers
+    function llenarSelectores(){
+        actualizarSelectoresTienda();
+        actualizarSelectoresShopper();
+        let marcaSel=document.getElementById("marca"); marcaSel.innerHTML=""; marcas.forEach(m=>marcaSel.add(new Option(m,m)));
+        document.getElementById("tipoCambio").value=tcGlobal; document.getElementById("fecha").value=new Date().toISOString().slice(0,10); document.getElementById("depFecha").value=new Date().toISOString().slice(0,10);
+        document.getElementById("displayTC").innerText=tcGlobal; document.getElementById("displayComision").innerText=comisionGlobal; document.getElementById("descuentoHH").value=happyHour.descuento;
+    }
+    function actualizarUI(){ llenarSelectores(); actualizarPreview(); }
+    function actualizarTodo(){ mostrarVentas(); mostrarDepositosIndep(); mostrarClientes(); actualizarStats(); actualizarReportes(); llenarSelectores(); actualizarPreview(); mostrarCatalogosUI(); }
+
+    function mostrarTab(tabId){
+        document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+        document.getElementById(`${tabId}Panel`).classList.add('active');
+        document.querySelectorAll('.tab-btn').forEach(btn=>btn.classList.remove('active'));
+        document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+        if(tabId==='captura') actualizarPreview();
+    }
+
+    // Eventos DOM
+    document.getElementById("btnMicrofono").onclick = toggleMicrofono;
+    document.getElementById("btnAgregarVenta").onclick = () => agregarVenta(true);
+    document.getElementById("btnGuardarNueva").onclick = () => agregarVenta(false);
+    document.getElementById("btnExportarExcel").onclick = exportarExcel;
+    document.getElementById("btnLimpiarTodo").onclick = limpiarTodo;
+    document.getElementById("btnGuardarCliente").onclick = guardarCliente;
+    document.getElementById("btnRegistrarDeposito").onclick = registrarDepositoIndependiente;
+    document.getElementById("btnCambiarTC").onclick = cambiarTC;
+    document.getElementById("btnCambiarComision").onclick = cambiarComision;
+    document.getElementById("btnIniciarHH").onclick = iniciarCronometro;
+    document.getElementById("btnPausarHH").onclick = pausarCronometro;
+    document.getElementById("btnResetHH").onclick = resetCronometro;
+    document.getElementById("btnAplicarDescuento").onclick = aplicarDescuento;
+    document.getElementById("btnAgregarTienda").onclick = agregarTienda;
+    document.getElementById("btnAgregarShopper").onclick = agregarShopper;
+    document.getElementById("btnImportarExcel").onclick = () => document.getElementById("fileExcelInput").click();
+    document.getElementById("fileExcelInput").onchange = async (e) => { if(e.target.files.length) await importarClientesDesdeExcel(e.target.files[0]); e.target.value=""; };
+    document.getElementById("cancelarEdicionBtn").onclick = cerrarModal;
+    document.getElementById("cancelarPagoBtn").onclick = cerrarModalPago;
+    document.getElementById("cancelarWhatsappBtn").onclick = cerrarModalWhatsapp;
+    document.querySelectorAll(".close-modal").forEach(el => el.onclick = cerrarModal);
+    
+    document.getElementById("precioUSD").addEventListener("input", actualizarPreview);
+    document.getElementById("tipoCambio").addEventListener("input", actualizarPreview);
+    
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => mostrarTab(btn.getAttribute("data-tab"))));
+    
+    window.onload = () => { mostrarTab('dashboard'); };
+</script>
+</body>
+</html>
