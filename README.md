@@ -1,0 +1,2 @@
+# ventas
+captura de ventas 
