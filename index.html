@@ -2,307 +2,77 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Admin Ventas Pro - Acceso con 1234</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Ventas Pro - Acceso 1234</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, sans-serif;
-        }
-
-        body {
-            background: linear-gradient(135deg, #f5f7fc 0%, #e9eef4 100%);
-            min-height: 100vh;
-            padding: 30px 24px;
-        }
-
-        .login-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.55);
-            backdrop-filter: blur(12px);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 20000;
-        }
-        .login-card {
-            background: white;
-            border-radius: 32px;
-            padding: 40px;
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-        }
-        .login-card h2 {
-            font-size: 28px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #1e293b;
-        }
-        .login-card input {
-            width: 100%;
-            padding: 14px;
-            margin: 15px 0;
-            border: 1px solid #cbd5e1;
-            border-radius: 60px;
-            font-size: 16px;
-        }
-        .login-card button {
-            width: 100%;
-            padding: 14px;
-            background: #3b82f6;
-            color: white;
-            border: none;
-            border-radius: 60px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .error-msg {
-            color: #ef4444;
-            margin-top: 12px;
-        }
-
-        .admin-container {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 32px;
-            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-            display: none;
-        }
-        .admin-header {
-            background: white;
-            padding: 20px 32px;
-            border-bottom: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-        .admin-header h1 {
-            font-size: 24px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #2563eb, #1e40af);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .tabs {
-            display: flex;
-            gap: 8px;
-            padding: 0 32px;
-            background: white;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        .tab-btn {
-            padding: 14px 24px;
-            font-size: 15px;
-            font-weight: 500;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            color: #475569;
-            border-radius: 12px 12px 0 0;
-            transition: all 0.2s;
-        }
-        .tab-btn.active {
-            color: #3b82f6;
-            background: #eff6ff;
-            border-bottom: 2px solid #3b82f6;
-        }
-        .panel {
-            display: none;
-            padding: 28px 32px;
-            background: #f8fafc;
-        }
-        .panel.active {
-            display: block;
-        }
-        .card {
-            background: white;
-            border-radius: 24px;
-            padding: 24px;
-            margin-bottom: 28px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-            border: 1px solid #eef2f6;
-        }
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: #0f172a;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-            margin-bottom: 28px;
-        }
-        .stat-card {
-            background: white;
-            border-radius: 24px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid #eef2f6;
-        }
-        .stat-card .value {
-            font-size: 32px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-        .form-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-            gap: 20px;
-            margin-bottom: 24px;
-        }
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-        .form-group label {
-            font-size: 12px;
-            font-weight: 600;
-            color: #475569;
-            text-transform: uppercase;
-        }
-        input, select {
-            padding: 12px 16px;
-            border: 1px solid #cbd5e1;
-            border-radius: 16px;
-            font-size: 14px;
-            background: white;
-        }
-        button {
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 500;
-            border: none;
-            cursor: pointer;
-            transition: 0.2s;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+        body { background: linear-gradient(135deg, #f5f7fc 0%, #e9eef4 100%); min-height: 100vh; padding: 20px; }
+        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 20000; }
+        .login-card { background: white; border-radius: 32px; padding: 40px; width: 90%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .login-card h2 { font-size: 28px; margin-bottom: 20px; }
+        .login-card input { width: 100%; padding: 14px; margin: 15px 0; border: 1px solid #cbd5e1; border-radius: 60px; font-size: 16px; text-align: center; }
+        .login-card button { width: 100%; padding: 14px; background: #3b82f6; color: white; border: none; border-radius: 60px; font-size: 16px; font-weight: 600; cursor: pointer; }
+        .error-msg { color: #ef4444; margin-top: 12px; }
+        .admin-container { max-width: 1600px; margin: 0 auto; background: white; border-radius: 32px; box-shadow: 0 20px 35px -10px rgba(0,0,0,0.1); overflow: hidden; display: none; }
+        .admin-header { background: white; padding: 20px 32px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+        .admin-header h1 { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #2563eb, #1e40af); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .tabs { display: flex; gap: 8px; padding: 0 32px; background: white; border-bottom: 1px solid #e2e8f0; flex-wrap: wrap; }
+        .tab-btn { padding: 14px 24px; font-size: 15px; font-weight: 500; background: transparent; border: none; cursor: pointer; color: #475569; border-radius: 12px 12px 0 0; transition: all 0.2s; }
+        .tab-btn.active { color: #3b82f6; background: #eff6ff; border-bottom: 2px solid #3b82f6; }
+        .panel { display: none; padding: 28px 32px; background: #f8fafc; }
+        .panel.active { display: block; }
+        .card { background: white; border-radius: 24px; padding: 24px; margin-bottom: 28px; box-shadow: 0 4px 12px rgba(0,0,0,0.03); border: 1px solid #eef2f6; }
+        .card-title { font-size: 18px; font-weight: 600; margin-bottom: 20px; color: #0f172a; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-bottom: 28px; }
+        .stat-card { background: white; border-radius: 24px; padding: 20px; text-align: center; border: 1px solid #eef2f6; }
+        .stat-card .value { font-size: 32px; font-weight: 700; color: #0f172a; }
+        .form-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .form-group { display: flex; flex-direction: column; gap: 6px; }
+        .form-group label { font-size: 12px; font-weight: 600; color: #475569; text-transform: uppercase; }
+        input, select { padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 16px; font-size: 14px; background: white; }
+        button { padding: 10px 20px; border-radius: 40px; font-weight: 500; border: none; cursor: pointer; transition: 0.2s; }
         button.primary { background: #3b82f6; color: white; }
         button.success { background: #10b981; color: white; }
         button.danger { background: #ef4444; color: white; }
         button.warning { background: #f59e0b; color: white; }
         button.small { padding: 6px 12px; font-size: 12px; }
         button.outline { background: white; border: 1px solid #cbd5e1; color: #1e293b; }
-        .microphone-btn {
-            background: #3b82f6;
-            color: white;
-            border-radius: 60px;
-            padding: 8px 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-        .microphone-btn.listening {
-            background: #ef4444;
-            animation: pulse 1.5s infinite;
-        }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.6; }
-            100% { opacity: 1; }
-        }
-        .voice-status {
-            background: #f1f5f9;
-            border-radius: 40px;
-            padding: 6px 12px;
-            font-size: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .table-wrapper {
-            overflow-x: auto;
-            border-radius: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-        th {
-            text-align: left;
-            padding: 14px 12px;
-            background: #f1f5f9;
-            color: #334155;
-            font-weight: 600;
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid #eef2f6;
-        }
-        .badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 600;
-        }
+        .microphone-btn { background: #3b82f6; color: white; border-radius: 60px; padding: 8px 16px; display: inline-flex; align-items: center; gap: 8px; font-size: 14px; }
+        .microphone-btn.listening { background: #ef4444; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .voice-status { background: #f1f5f9; border-radius: 40px; padding: 6px 12px; font-size: 12px; display: inline-flex; align-items: center; gap: 6px; }
+        .table-wrapper { overflow-x: auto; border-radius: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 14px 12px; background: #f1f5f9; color: #334155; font-weight: 600; }
+        td { padding: 12px; border-bottom: 1px solid #eef2f6; }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 30px; font-size: 12px; font-weight: 600; }
         .badge.pagado { background: #d1fae5; color: #065f46; }
         .badge.pendiente { background: #fee2e2; color: #991b1b; }
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(4px);
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: white;
-            border-radius: 32px;
-            max-width: 500px;
-            width: 90%;
-            padding: 28px;
-        }
-        @media (max-width: 700px) {
-            body { padding: 16px; }
-            .panel { padding: 20px; }
-            .tabs { padding: 0 16px; }
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(4px); align-items: center; justify-content: center; z-index: 1000; }
+        .modal-content { background: white; border-radius: 32px; max-width: 500px; width: 90%; padding: 28px; }
+        @media (max-width: 700px) { .panel { padding: 20px; } .tabs { padding: 0 16px; } }
     </style>
 </head>
 <body>
 
-<!-- LOGIN con contraseña 1234 -->
+<!-- PANTALLA DE LOGIN -->
 <div id="loginOverlay" class="login-overlay">
     <div class="login-card">
         <h2>🔐 Acceso al Sistema</h2>
         <input type="password" id="loginPassword" placeholder="Contraseña" autocomplete="off">
-        <button onclick="verificarPassword()">Ingresar</button>
+        <button id="btnLogin">Ingresar</button>
         <div id="loginError" class="error-msg"></div>
         <p style="margin-top: 15px; font-size: 12px; color: #6c6c70;">Contraseña: 1234</p>
     </div>
 </div>
 
-<!-- ADMIN CONTAINER -->
+<!-- CONTENEDOR PRINCIPAL -->
 <div class="admin-container" id="appContainer">
     <div class="admin-header">
         <h1>📊 Admin Ventas Pro</h1>
-        <button class="outline small" onclick="cerrarSesion()">🚪 Salir</button>
+        <button class="outline small" id="btnSalir">🚪 Salir</button>
     </div>
-    <div class="tabs">
+    <div class="tabs" id="tabsContainer">
         <button class="tab-btn active" data-tab="dashboard">📈 Dashboard</button>
         <button class="tab-btn" data-tab="captura">📝 Capturar venta</button>
         <button class="tab-btn" data-tab="ventas">📋 Ventas</button>
@@ -317,8 +87,8 @@
         <div class="card">
             <div class="card-title">⚙️ Configuración rápida</div>
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-                <div><strong>Tipo de cambio:</strong> $<span id="displayTC">17.40</span> <button class="small outline" onclick="cambiarTC()">Editar</button></div>
-                <div><strong>Comisión:</strong> <span id="displayComision">10</span>% <button class="small outline" onclick="cambiarComision()">Editar</button></div>
+                <div><strong>Tipo de cambio:</strong> $<span id="displayTC">17.40</span> <button class="small outline" id="btnCambiarTC">Editar</button></div>
+                <div><strong>Comisión:</strong> <span id="displayComision">10</span>% <button class="small outline" id="btnCambiarComision">Editar</button></div>
                 <div><strong>Hora feliz:</strong> <span id="cronometroDisplay">00:00</span> <button class="small primary" id="btnIniciarHH">Iniciar</button> <button class="small warning" id="btnPausarHH">Pausar</button> <button class="small danger" id="btnResetHH">Reset</button> <input type="number" id="descuentoHH" style="width:70px" value="10">% <button class="small" id="btnAplicarDescuento">Aplicar</button></div>
             </div>
         </div>
@@ -328,7 +98,7 @@
         </div>
     </div>
 
-    <!-- CAPTURA VENTA con micrófono -->
+    <!-- CAPTURA -->
     <div id="capturaPanel" class="panel">
         <div class="card">
             <div class="card-title">🎯 Nueva venta 
@@ -354,8 +124,8 @@
                 <div id="previewDetalle" style="font-size:12px;"></div>
             </div>
             <div style="display: flex; gap: 12px;">
-                <button class="primary" id="btnAgregarVenta" onclick="agregarVenta(true)">➕ Agregar venta</button>
-                <button class="success" id="btnGuardarNueva" onclick="agregarVenta(false)">⚡ Guardar y nueva</button>
+                <button class="primary" id="btnAgregarVenta">➕ Agregar venta</button>
+                <button class="success" id="btnGuardarNueva">⚡ Guardar y nueva</button>
             </div>
         </div>
     </div>
@@ -365,8 +135,8 @@
         <div class="card">
             <div class="card-title">📋 Listado de ventas</div>
             <div style="margin-bottom: 16px; display: flex; gap: 10px;">
-                <button class="success" onclick="exportarExcel()">📥 Exportar Excel</button>
-                <button class="danger" onclick="limpiarTodo()">🗑️ Limpiar todo</button>
+                <button class="success" id="btnExportarExcel">📥 Exportar Excel</button>
+                <button class="danger" id="btnLimpiarTodo">🗑️ Limpiar todo</button>
             </div>
             <div class="table-wrapper">
                 <table id="tablaVentas">
@@ -390,7 +160,7 @@
                 <div class="form-group"><label>Número WhatsApp completo</label><input type="text" id="whatsappCliente" placeholder="521234567890 (sin +)"></div>
                 <div class="form-group"><label>Nombre (opcional)</label><input type="text" id="nombreCliente"></div>
             </div>
-            <button class="primary" onclick="guardarCliente()">💾 Guardar cliente</button>
+            <button class="primary" id="btnGuardarCliente">💾 Guardar cliente</button>
             <hr style="margin: 20px 0;">
             <div class="table-wrapper">
                 <table><thead><tr><th>Código</th><th>Nombre</th><th>WhatsApp</th><th>Acciones</th></tr></thead><tbody id="tbodyClientes"></tbody></table>
@@ -410,7 +180,7 @@
                 <div class="form-group"><label>Monto MXN</label><input type="number" id="depMonto" step="0.01"></div>
                 <div class="form-group"><label>Banco</label><select id="depBanco"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
             </div>
-            <button class="primary" onclick="registrarDepositoIndependiente()">Registrar depósito</button>
+            <button class="primary" id="btnRegistrarDeposito">Registrar depósito</button>
             <hr style="margin: 20px 0;">
             <div class="table-wrapper"><table><thead><tr><th>Fecha</th><th>Cliente</th><th>Shopper</th><th>Monto</th><th>Banco</th><th></th></tr></thead><tbody id="tbodyDepositosIndep"></tbody></table></div>
         </div>
@@ -420,18 +190,18 @@
     <div id="reportesPanel" class="panel">
         <div class="card">
             <div class="card-title">📊 Resumen por shopper</div>
-            <div class="table-wrapper"></table><thead><tr><th>Shopper</th><th>Artículos</th><th>USD</th><th>Total MXN</th><th>Depósitos</th><th>Saldo pendiente</th></tr></thead><tbody id="tbodyReportes"></tbody></table></div>
+            <div class="table-wrapper"><table><thead><tr><th>Shopper</th><th>Artículos</th><th>USD</th><th>Total MXN</th><th>Depósitos</th><th>Saldo pendiente</th></tr></thead><tbody id="tbodyReportes"></tbody></table></div>
         </div>
     </div>
 </div>
 
-<!-- Modales -->
-<div id="editModal" class="modal"><div class="modal-content"><div style="display:flex; justify-content:space-between;"><span>✏️ Editar venta</span><span class="close-modal" onclick="cerrarModal()">&times;</span></div><div id="editFormContainer"></div><div style="margin-top:20px"><button class="primary" id="guardarEdicionBtn">Guardar</button><button onclick="cerrarModal()">Cancelar</button></div></div></div>
-<div id="pagoModal" class="modal"><div class="modal-content"><h3>💰 Registrar pago</h3><label>Monto adicional MXN:</label><input type="number" id="montoPago" step="0.01" style="margin:15px 0"><div><button class="success" id="confirmarPagoBtn">Aplicar</button><button onclick="cerrarModalPago()">Cancelar</button></div></div></div>
-<div id="whatsappModal" class="modal"><div class="modal-content"><h3 style="margin-bottom:15px;">📲 Enviar total por WhatsApp</h3><p id="modalClienteInfo"></p><p><strong>Total a pagar:</strong> $<span id="modalTotalPagar">0.00</span></p><label>Número WhatsApp (con código país):</label><input type="text" id="modalWhatsappNum" placeholder="521234567890"><div style="margin-top:20px; display:flex; gap:10px;"><button class="success" id="confirmarEnvioWhatsapp">📤 Enviar mensaje</button><button onclick="cerrarModalWhatsapp()">Cancelar</button></div></div></div>
+<!-- MODALES -->
+<div id="editModal" class="modal"><div class="modal-content"><div style="display:flex; justify-content:space-between;"><span>✏️ Editar venta</span><span class="close-modal" style="cursor:pointer;">&times;</span></div><div id="editFormContainer"></div><div style="margin-top:20px"><button class="primary" id="guardarEdicionBtn">Guardar</button><button id="cancelarEdicionBtn">Cancelar</button></div></div></div>
+<div id="pagoModal" class="modal"><div class="modal-content"><h3>💰 Registrar pago</h3><label>Monto adicional MXN:</label><input type="number" id="montoPago" step="0.01" style="margin:15px 0"><div><button class="success" id="confirmarPagoBtn">Aplicar</button><button id="cancelarPagoBtn">Cancelar</button></div></div></div>
+<div id="whatsappModal" class="modal"><div class="modal-content"><h3>📲 Enviar total por WhatsApp</h3><p id="modalClienteInfo"></p><p><strong>Total a pagar:</strong> $<span id="modalTotalPagar">0.00</span></p><label>Número WhatsApp (con código país):</label><input type="text" id="modalWhatsappNum" placeholder="521234567890"><div style="margin-top:20px; display:flex; gap:10px;"><button class="success" id="confirmarEnvioWhatsapp">📤 Enviar mensaje</button><button id="cancelarWhatsappBtn">Cancelar</button></div></div></div>
 
 <script>
-    // -------------------- DATOS GLOBALES --------------------
+    // ---------- DATOS GLOBALES ----------
     let ventas = [];
     let depositosIndep = [];
     let clientes = [];
@@ -455,7 +225,7 @@
     // ---------- RECONOCIMIENTO DE VOZ ----------
     let recognition = null;
     let listening = false;
-    
+
     function iniciarReconocimientoVoz() {
         if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
             alert("Tu navegador no soporta reconocimiento de voz. Usa Chrome o Edge.");
@@ -469,36 +239,34 @@
         
         recognition.onstart = () => {
             listening = true;
-            document.getElementById("btnMicrofono").innerHTML = "🎤 Desactivar micrófono";
-            document.getElementById("btnMicrofono").classList.add("listening");
+            const btn = document.getElementById("btnMicrofono");
+            btn.innerHTML = "🎤 Desactivar micrófono";
+            btn.classList.add("listening");
             document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando... (di 'siguiente', 'precio 50', etc.)";
         };
         recognition.onerror = (event) => {
             console.error("Error de reconocimiento:", event.error);
-            if (event.error === 'not-allowed') {
-                alert("Permiso de micrófono denegado. Actívalo en la configuración del navegador.");
-            }
+            if (event.error === 'not-allowed') alert("Permiso de micrófono denegado.");
             detenerReconocimiento();
         };
         recognition.onend = () => {
-            if (listening) {
-                recognition.start();
-            } else {
-                document.getElementById("btnMicrofono").innerHTML = "🎤 Activar micrófono";
-                document.getElementById("btnMicrofono").classList.remove("listening");
+            if (listening) recognition.start();
+            else {
+                const btn = document.getElementById("btnMicrofono");
+                btn.innerHTML = "🎤 Activar micrófono";
+                btn.classList.remove("listening");
                 document.getElementById("voiceStatus").innerHTML = "⚪ Micrófono apagado";
             }
         };
         recognition.onresult = (event) => {
             const last = event.results.length - 1;
             const texto = event.results[last][0].transcript.trim().toLowerCase();
-            console.log("Comando:", texto);
             procesarComandoVoz(texto);
         };
         recognition.start();
         return true;
     }
-    
+
     function detenerReconocimiento() {
         if (recognition) {
             listening = false;
@@ -506,97 +274,57 @@
             recognition = null;
         }
     }
-    
+
     function toggleMicrofono() {
-        if (listening) {
-            detenerReconocimiento();
-        } else {
-            iniciarReconocimientoVoz();
-        }
+        if (listening) detenerReconocimiento();
+        else iniciarReconocimientoVoz();
     }
-    
+
     function obtenerCamposFormulario() {
-        let contenedor = document.querySelector("#capturaPanel .form-grid");
+        const contenedor = document.querySelector("#capturaPanel .form-grid");
         if (!contenedor) return [];
         return Array.from(contenedor.querySelectorAll("input, select"));
     }
-    
+
     function siguienteCampo() {
-        let campos = obtenerCamposFormulario();
-        let active = document.activeElement;
+        const campos = obtenerCamposFormulario();
+        const active = document.activeElement;
         let index = campos.findIndex(campo => campo === active);
         let nextIndex = (index + 1) % campos.length;
         campos[nextIndex].focus();
         document.getElementById("voiceStatus").innerHTML = `🎙️ Saltó al campo ${nextIndex+1}`;
-        setTimeout(() => {
-            if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando...";
-        }, 1500);
+        setTimeout(() => { if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando..."; }, 1500);
     }
-    
+
     function procesarComandoVoz(texto) {
         document.getElementById("voiceStatus").innerHTML = `🎙️ Comando: "${texto}"`;
-        setTimeout(() => {
-            if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando...";
-        }, 2000);
+        setTimeout(() => { if (listening) document.getElementById("voiceStatus").innerHTML = "🎙️ Escuchando..."; }, 2000);
         
-        if (texto === "siguiente" || texto === "siguiente campo") {
-            siguienteCampo();
-            return;
-        }
-        if (texto === "guardar" || texto === "agregar venta") {
-            document.getElementById("btnAgregarVenta").click();
-            return;
-        }
-        if (texto === "guardar y nueva") {
-            document.getElementById("btnGuardarNueva").click();
-            return;
-        }
-        let matchPrecio = texto.match(/precio\s+(\d+(?:\.\d+)?)/);
-        if (matchPrecio) {
-            document.getElementById("precioUSD").value = parseFloat(matchPrecio[1]);
-            actualizarPreview();
-            return;
-        }
-        let matchDeposito = texto.match(/depósito\s+(\d+(?:\.\d+)?)/);
-        if (matchDeposito) {
-            document.getElementById("deposito").value = parseFloat(matchDeposito[1]);
-            actualizarPreview();
-            return;
-        }
-        let matchPiezas = texto.match(/piezas?\s+(\d+)/);
-        if (matchPiezas) {
-            document.getElementById("pzas").value = parseInt(matchPiezas[1]);
-            return;
-        }
-        let matchCliente = texto.match(/cliente\s+(\d{4})/);
-        if (matchCliente) {
-            document.getElementById("cliente").value = matchCliente[1];
-            return;
-        }
-        let matchTalla = texto.match(/talla\s+(\w+)/);
-        if (matchTalla) {
-            document.getElementById("talla").value = matchTalla[1];
-            return;
-        }
-        let matchProducto = texto.match(/producto\s+(.+)/);
-        if (matchProducto) {
-            document.getElementById("producto").value = matchProducto[1];
-            return;
-        }
-        let marcasLower = marcas.map(m => m.toLowerCase());
-        for (let i = 0; i < marcasLower.length; i++) {
-            if (texto.includes(marcasLower[i])) {
-                document.getElementById("marca").value = marcas[i];
-                return;
-            }
+        if (texto === "siguiente" || texto === "siguiente campo") { siguienteCampo(); return; }
+        if (texto === "guardar" || texto === "agregar venta") { document.getElementById("btnAgregarVenta").click(); return; }
+        if (texto === "guardar y nueva") { document.getElementById("btnGuardarNueva").click(); return; }
+        
+        let match = texto.match(/precio\s+(\d+(?:\.\d+)?)/);
+        if (match) { document.getElementById("precioUSD").value = parseFloat(match[1]); actualizarPreview(); return; }
+        match = texto.match(/depósito\s+(\d+(?:\.\d+)?)/);
+        if (match) { document.getElementById("deposito").value = parseFloat(match[1]); actualizarPreview(); return; }
+        match = texto.match(/piezas?\s+(\d+)/);
+        if (match) { document.getElementById("pzas").value = parseInt(match[1]); return; }
+        match = texto.match(/cliente\s+(\d{4})/);
+        if (match) { document.getElementById("cliente").value = match[1]; return; }
+        match = texto.match(/talla\s+(\w+)/);
+        if (match) { document.getElementById("talla").value = match[1]; return; }
+        match = texto.match(/producto\s+(.+)/);
+        if (match) { document.getElementById("producto").value = match[1]; return; }
+        for (let m of marcas) {
+            if (texto.includes(m.toLowerCase())) { document.getElementById("marca").value = m; return; }
         }
     }
-    
+
     // ---------- LOGIN ----------
-    function verificarPassword() {
-        let pass = document.getElementById("loginPassword").value;
-        console.log("Contraseña ingresada:", pass);
-        if (pass === "1234") {   // CAMBIADA A 1234
+    document.getElementById("btnLogin").onclick = () => {
+        const pass = document.getElementById("loginPassword").value;
+        if (pass === "1234") {
             document.getElementById("loginOverlay").style.display = "none";
             document.getElementById("appContainer").style.display = "block";
             cargarDatos();
@@ -606,15 +334,14 @@
         } else {
             document.getElementById("loginError").innerText = "Contraseña incorrecta. Prueba con 1234";
         }
-    }
-    
-    function cerrarSesion() {
+    };
+    document.getElementById("btnSalir").onclick = () => {
         detenerReconocimiento();
         document.getElementById("loginOverlay").style.display = "flex";
         document.getElementById("appContainer").style.display = "none";
-    }
+    };
 
-    // Sincronización
+    // Sincronización entre pestañas
     function iniciarSincronizacion() {
         window.addEventListener('storage', (e) => {
             if (e.key === 'ventas_sistema') { cargarVentas(); actualizarTodo(); }
@@ -695,7 +422,7 @@
         mostrarTab('ventas');
     }
 
-    // Mostrar ventas con botón WhatsApp
+    // Mostrar ventas
     function mostrarVentas() {
         let tbody=document.getElementById("tbodyVentas"); tbody.innerHTML="";
         ventas.forEach((v,idx)=>{
@@ -720,37 +447,6 @@
         });
     }
 
-    // Enviar total por WhatsApp
-    function abrirEnvioWhatsapp(codigoCliente) {
-        let ventasCliente = ventas.filter(v => v.cliente === codigoCliente);
-        let totalPendiente = ventasCliente.reduce((sum, v) => sum + (v.saldo > 0 ? v.saldo : 0), 0);
-        if(totalPendiente === 0) { alert("Este cliente no tiene saldo pendiente"); return; }
-        let clienteInfo = clientes.find(c => c.codigo === codigoCliente);
-        let numeroWhatsapp = clienteInfo ? clienteInfo.whatsapp : "";
-        document.getElementById("modalClienteInfo").innerHTML = `Cliente: ${codigoCliente} ${clienteInfo ? `(${clienteInfo.nombre})` : ''}`;
-        document.getElementById("modalTotalPagar").innerText = totalPendiente.toFixed(2);
-        document.getElementById("modalWhatsappNum").value = numeroWhatsapp;
-        currentClienteEnvio = codigoCliente;
-        document.getElementById("whatsappModal").style.display = "flex";
-        document.getElementById("confirmarEnvioWhatsapp").onclick = () => enviarWhatsapp(currentClienteEnvio);
-    }
-    function enviarWhatsapp(codigoCliente) {
-        let numero = document.getElementById("modalWhatsappNum").value.trim();
-        if(!numero) { alert("Ingrese número de WhatsApp"); return; }
-        let ventasCliente = ventas.filter(v => v.cliente === codigoCliente);
-        let totalPendiente = ventasCliente.reduce((sum, v) => sum + (v.saldo > 0 ? v.saldo : 0), 0);
-        let mensaje = `*Resumen de compras*\nCliente: ${codigoCliente}\n\n`;
-        ventasCliente.forEach(v => {
-            if(v.saldo > 0) mensaje += `📦 ${v.marca} ${v.producto} - Total: $${v.totalMXN.toFixed(2)} | Pagado: $${v.deposito.toFixed(2)} | Saldo: $${v.saldo.toFixed(2)}\n`;
-        });
-        mensaje += `\n*Total a pagar: $${totalPendiente.toFixed(2)}*\nGracias por tu compra.`;
-        let url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
-        window.open(url, '_blank');
-        cerrarModalWhatsapp();
-    }
-    function cerrarModalWhatsapp() { document.getElementById("whatsappModal").style.display = "none"; currentClienteEnvio = null; }
-
-    // Editar, pagar, eliminar
     function eliminarVenta(idx){ if(confirm("¿Cancelar esta venta?")){ ventas.splice(idx,1); guardarTodo(); actualizarTodo(); } }
     function abrirEditar(idx){
         editIndex=idx; let v=ventas[idx];
@@ -828,9 +524,6 @@
             let whatsapp = String(rows[i][idxWhatsapp] || "").trim();
             let nombre = String(rows[i][idxNombre] || "").trim();
             if(codigo && whatsapp) {
-                if(codigo.length !== 4 && !/^\d{4}$/.test(codigo)) {
-                    console.warn(`Código ${codigo} no tiene 4 dígitos, se importa igual`);
-                }
                 let existente = clientes.findIndex(c => c.codigo === codigo);
                 if(existente >= 0) clientes[existente] = { codigo, whatsapp, nombre };
                 else clientes.push({ codigo, whatsapp, nombre });
@@ -841,9 +534,7 @@
             guardarTodo();
             mostrarClientes();
             alert(`Se importaron/actualizaron ${importados} clientes.`);
-        } else {
-            alert("No se encontraron clientes válidos (código y whatsapp requeridos)");
-        }
+        } else { alert("No se encontraron clientes válidos"); }
     }
 
     function mostrarClientes(){
@@ -877,7 +568,6 @@
         });
     }
 
-    // Stats y reportes
     function actualizarStats(){
         let arts=ventas.reduce((s,v)=>s+v.pzas,0), usd=ventas.reduce((s,v)=>s+v.precioUSD*v.pzas,0), mxn=ventas.reduce((s,v)=>s+v.totalMXN,0), dep=ventas.reduce((s,v)=>s+v.deposito,0);
         let saldo=mxn-dep, depIndep=depositosIndep.reduce((s,d)=>s+d.monto,0), clientesUnicos=new Set(ventas.map(v=>v.cliente)).size;
@@ -897,6 +587,36 @@
         let tbody=document.getElementById("tbodyReportes"); tbody.innerHTML="";
         for(let sh in res){ let r=res[sh]; let pend=r.mxn-r.dep; let row=tbody.insertRow(); row.insertCell(0).innerText=sh; row.insertCell(1).innerText=r.articulos; row.insertCell(2).innerText=`$${r.usd.toFixed(2)}`; row.insertCell(3).innerText=`$${r.mxn.toFixed(2)}`; row.insertCell(4).innerText=`$${r.dep.toFixed(2)}`; row.insertCell(5).innerHTML=pend>0?`<span style="color:#ef4444;">$${pend.toFixed(2)}</span>`:`$${pend.toFixed(2)}`; }
     }
+
+    // WhatsApp
+    function abrirEnvioWhatsapp(codigoCliente) {
+        let ventasCliente = ventas.filter(v => v.cliente === codigoCliente);
+        let totalPendiente = ventasCliente.reduce((sum, v) => sum + (v.saldo > 0 ? v.saldo : 0), 0);
+        if(totalPendiente === 0) { alert("Este cliente no tiene saldo pendiente"); return; }
+        let clienteInfo = clientes.find(c => c.codigo === codigoCliente);
+        let numeroWhatsapp = clienteInfo ? clienteInfo.whatsapp : "";
+        document.getElementById("modalClienteInfo").innerHTML = `Cliente: ${codigoCliente} ${clienteInfo ? `(${clienteInfo.nombre})` : ''}`;
+        document.getElementById("modalTotalPagar").innerText = totalPendiente.toFixed(2);
+        document.getElementById("modalWhatsappNum").value = numeroWhatsapp;
+        currentClienteEnvio = codigoCliente;
+        document.getElementById("whatsappModal").style.display = "flex";
+        document.getElementById("confirmarEnvioWhatsapp").onclick = () => enviarWhatsapp(currentClienteEnvio);
+    }
+    function enviarWhatsapp(codigoCliente) {
+        let numero = document.getElementById("modalWhatsappNum").value.trim();
+        if(!numero) { alert("Ingrese número de WhatsApp"); return; }
+        let ventasCliente = ventas.filter(v => v.cliente === codigoCliente);
+        let totalPendiente = ventasCliente.reduce((sum, v) => sum + (v.saldo > 0 ? v.saldo : 0), 0);
+        let mensaje = `*Resumen de compras*\nCliente: ${codigoCliente}\n\n`;
+        ventasCliente.forEach(v => {
+            if(v.saldo > 0) mensaje += `📦 ${v.marca} ${v.producto} - Total: $${v.totalMXN.toFixed(2)} | Pagado: $${v.deposito.toFixed(2)} | Saldo: $${v.saldo.toFixed(2)}\n`;
+        });
+        mensaje += `\n*Total a pagar: $${totalPendiente.toFixed(2)}*\nGracias por tu compra.`;
+        let url = `https://wa.me/${numero}?text=${encodeURIComponent(mensaje)}`;
+        window.open(url, '_blank');
+        cerrarModalWhatsapp();
+    }
+    function cerrarModalWhatsapp() { document.getElementById("whatsappModal").style.display = "none"; currentClienteEnvio = null; }
 
     // Exportar Excel
     async function exportarExcel(){
@@ -943,7 +663,6 @@
     function actualizarUI(){ llenarSelectores(); actualizarPreview(); }
     function actualizarTodo(){ mostrarVentas(); mostrarDepositosIndep(); mostrarClientes(); actualizarStats(); actualizarReportes(); llenarSelectores(); actualizarPreview(); }
 
-    // Pestañas
     function mostrarTab(tabId){
         document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
         document.getElementById(`${tabId}Panel`).classList.add('active');
@@ -952,27 +671,32 @@
         if(tabId==='captura') actualizarPreview();
     }
 
-    // Eventos
-    document.getElementById("btnIniciarHH").addEventListener("click", iniciarCronometro);
-    document.getElementById("btnPausarHH").addEventListener("click", pausarCronometro);
-    document.getElementById("btnResetHH").addEventListener("click", resetCronometro);
-    document.getElementById("btnAplicarDescuento").addEventListener("click", aplicarDescuento);
-    document.querySelectorAll('.tab-btn').forEach(btn=>btn.addEventListener('click',()=>mostrarTab(btn.getAttribute('data-tab'))));
-    document.getElementById("precioUSD")?.addEventListener("input", actualizarPreview);
-    document.getElementById("tipoCambio")?.addEventListener("input", actualizarPreview);
-    document.getElementById("btnMicrofono")?.addEventListener("click", toggleMicrofono);
+    // Eventos DOM
+    document.getElementById("btnMicrofono").onclick = toggleMicrofono;
+    document.getElementById("btnAgregarVenta").onclick = () => agregarVenta(true);
+    document.getElementById("btnGuardarNueva").onclick = () => agregarVenta(false);
+    document.getElementById("btnExportarExcel").onclick = exportarExcel;
+    document.getElementById("btnLimpiarTodo").onclick = limpiarTodo;
+    document.getElementById("btnGuardarCliente").onclick = guardarCliente;
+    document.getElementById("btnRegistrarDeposito").onclick = registrarDepositoIndependiente;
+    document.getElementById("btnCambiarTC").onclick = cambiarTC;
+    document.getElementById("btnCambiarComision").onclick = cambiarComision;
+    document.getElementById("btnIniciarHH").onclick = iniciarCronometro;
+    document.getElementById("btnPausarHH").onclick = pausarCronometro;
+    document.getElementById("btnResetHH").onclick = resetCronometro;
+    document.getElementById("btnAplicarDescuento").onclick = aplicarDescuento;
+    document.getElementById("btnImportarExcel").onclick = () => document.getElementById("fileExcelInput").click();
+    document.getElementById("fileExcelInput").onchange = async (e) => { if(e.target.files.length) await importarClientesDesdeExcel(e.target.files[0]); e.target.value=""; };
+    document.getElementById("cancelarEdicionBtn").onclick = cerrarModal;
+    document.getElementById("cancelarPagoBtn").onclick = cerrarModalPago;
+    document.getElementById("cancelarWhatsappBtn").onclick = cerrarModalWhatsapp;
+    document.querySelectorAll(".close-modal").forEach(el => el.onclick = cerrarModal);
     
-    // Importar Excel
-    const importBtn = document.getElementById("btnImportarExcel");
-    const fileInput = document.getElementById("fileExcelInput");
-    if (importBtn) importBtn.addEventListener("click", () => fileInput.click());
-    if (fileInput) fileInput.addEventListener("change", async (e) => {
-        if(e.target.files.length > 0) {
-            await importarClientesDesdeExcel(e.target.files[0]);
-            fileInput.value = "";
-        }
-    });
-
+    document.getElementById("precioUSD").addEventListener("input", actualizarPreview);
+    document.getElementById("tipoCambio").addEventListener("input", actualizarPreview);
+    
+    document.querySelectorAll(".tab-btn").forEach(btn => btn.addEventListener("click", () => mostrarTab(btn.getAttribute("data-tab"))));
+    
     window.onload = () => { mostrarTab('dashboard'); };
 </script>
 </body>
