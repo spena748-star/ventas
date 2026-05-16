@@ -575,6 +575,7 @@ let hhSecs = 0, hhRunning = false, hhInterval = null;
 let editIdx = null, pagoIdx = null, waClienteActual = null;
 let activePanel = 'dashboard';
 let activeReport = 'shoppers';
+let dom = {};
 
 // ======================== STORAGE ========================
 function save() {
@@ -610,39 +611,39 @@ function calcNotaMX(precioU, pzas, tc, comision, hhActiva, hhDesc) {
 }
 
 function updatePreview() {
-  let pU = parseFloat(document.getElementById('f_precioUSD').value) || 0;
-  let pzas = parseInt(document.getElementById('f_pzas').value) || 1;
-  let tax = parseFloat(document.getElementById('f_tax').value) || db.taxUSA;
-  let tc = parseFloat(document.getElementById('f_tc').value) || db.tc;
-  let dep = parseFloat(document.getElementById('f_deposito').value) || 0;
+  let pU = parseFloat(dom.f_precioUSD.value) || 0;
+  let pzas = parseInt(dom.f_pzas.value) || 1;
+  let tax = parseFloat(dom.f_tax.value) || db.taxUSA;
+  let tc = parseFloat(dom.f_tc.value) || db.tc;
+  let dep = parseFloat(dom.f_deposito.value) || 0;
   let totalUSD = calcTotalUSD(pU, pzas, tax);
   let total1 = calcTotal1(totalUSD, tc);
   let notaMX = calcNotaMX(pU, pzas, tc, db.comision, db.hh.activa, db.hh.desc);
   let dif = notaMX - dep;
-  document.getElementById('prev_totalUSD').textContent = '$' + totalUSD.toFixed(2);
-  document.getElementById('prev_totalMXN').textContent = '$' + total1.toFixed(2);
-  document.getElementById('prev_notaMX').textContent = '$' + notaMX.toFixed(2);
-  document.getElementById('prev_dep').textContent = '$' + dep.toFixed(2);
-  let difEl = document.getElementById('prev_dif');
+  dom.prev_totalUSD.textContent = '$' + totalUSD.toFixed(2);
+  dom.prev_totalMXN.textContent = '$' + total1.toFixed(2);
+  dom.prev_notaMX.textContent = '$' + notaMX.toFixed(2);
+  dom.prev_dep.textContent = '$' + dep.toFixed(2);
+  let difEl = dom.prev_dif;
   difEl.textContent = '$' + Math.abs(dif).toFixed(2) + (dif < 0 ? ' (a favor)' : dif > 0 ? ' (pend)' : '');
   difEl.style.color = dif > 0 ? '#dc2626' : dif < 0 ? '#059669' : '#fff';
 }
 
 // ======================== VENTAS CRUD ========================
 function addVenta(resetForm) {
-  let fecha = document.getElementById('f_fecha').value;
-  let tienda = document.getElementById('f_tienda').value;
-  let shopper = document.getElementById('f_shopper').value;
-  let cliente = document.getElementById('f_cliente').value.trim();
-  let pzas = parseInt(document.getElementById('f_pzas').value) || 1;
-  let marca = document.getElementById('f_marca').value;
-  let producto = document.getElementById('f_producto').value.trim();
-  let talla = document.getElementById('f_talla').value.trim();
-  let precioU = parseFloat(document.getElementById('f_precioUSD').value) || 0;
-  let tax = parseFloat(document.getElementById('f_tax').value) || db.taxUSA;
-  let tc = parseFloat(document.getElementById('f_tc').value) || db.tc;
-  let deposito = parseFloat(document.getElementById('f_deposito').value) || 0;
-  let banco = document.getElementById('f_banco').value;
+  let fecha = dom.f_fecha.value;
+  let tienda = dom.f_tienda.value;
+  let shopper = dom.f_shopper.value;
+  let cliente = dom.f_cliente.value.trim();
+  let pzas = parseInt(dom.f_pzas.value) || 1;
+  let marca = dom.f_marca.value;
+  let producto = dom.f_producto.value.trim();
+  let talla = dom.f_talla.value.trim();
+  let precioU = parseFloat(dom.f_precioUSD.value) || 0;
+  let tax = parseFloat(dom.f_tax.value) || db.taxUSA;
+  let tc = parseFloat(dom.f_tc.value) || db.tc;
+  let deposito = parseFloat(dom.f_deposito.value) || 0;
+  let banco = dom.f_banco.value;
 
   if(!fecha || !tienda || !shopper || !cliente || !producto || precioU <= 0) {
     alert('Completa: Fecha, Tienda, Shopper, Cliente, Producto y Precio USD');
@@ -659,13 +660,13 @@ function addVenta(resetForm) {
   refreshAll();
 
   if(resetForm) {
-    document.getElementById('f_cliente').value = '';
-    document.getElementById('f_producto').value = '';
-    document.getElementById('f_talla').value = '';
-    document.getElementById('f_precioUSD').value = '';
-    document.getElementById('f_deposito').value = '0';
-    document.getElementById('f_pzas').value = '1';
-    document.getElementById('f_cliente').focus();
+    dom.f_cliente.value = '';
+    dom.f_producto.value = '';
+    dom.f_talla.value = '';
+    dom.f_precioUSD.value = '';
+    dom.f_deposito.value = '0';
+    dom.f_pzas.value = '1';
+    dom.f_cliente.focus();
     updatePreview();
   } else {
     showPanel('ventas');
@@ -773,23 +774,23 @@ function closeModal(id) {
 
 // ======================== RENDER VENTAS ========================
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
+  let filtro = (dom.filtroVentas?.value||'').toLowerCase();
+  let filtroSh = dom.filtroShopperV?.value||'';
+  let filtroTi = dom.filtroTiendaV?.value||'';
+
   let filtered = db.ventas.filter(v => {
     let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
     let sh = !filtroSh || v.shopper === filtroSh;
     let ti = !filtroTi || v.tienda === filtroTi;
     return match && sh && ti;
   });
+
+  let html = '';
   filtered.forEach((v, i) => {
     let idx = db.ventas.indexOf(v);
     let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
     let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
+    html += `<tr>
       <td>#${v.id}</td>
       <td>${v.fecha}</td>
       <td>${v.tienda}</td>
@@ -811,15 +812,15 @@ function renderVentas() {
           <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
           <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
         </div>
-      </td>`;
-    tbody.appendChild(tr);
+      </td></tr>`;
   });
+  dom.tbodyVentas.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
 function renderCobranza() {
-  let filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
-  let filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
+  let filtroCliente = (dom.filtroCobranza?.value||'').toLowerCase();
+  let filtroTienda = dom.filtroTiendaCob?.value||'';
 
   // Group by cliente
   let map = {};
@@ -844,8 +845,8 @@ function renderCobranza() {
   let bancos = {};
   db.ventas.forEach(v => { if(v.banco && v.deposito>0) { bancos[v.banco] = (bancos[v.banco]||0)+v.deposito; } });
   db.depIndep.forEach(d => { if(d.banco) { bancos[d.banco] = (bancos[d.banco]||0)+d.monto; } });
-  let bancosEl = document.getElementById('bancosSummary');
-  bancosEl.innerHTML = Object.entries(bancos).map(([b,m])=>`
+
+  dom.bancosSummary.innerHTML = Object.entries(bancos).map(([b,m])=>`
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
       <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
       <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
@@ -855,8 +856,7 @@ function renderCobranza() {
   })();
 
   // Table
-  let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
+  let html = '';
   let totPzas=0, totMXN=0, totDep=0, totDif=0;
   entries.forEach((e,i) => {
     let dif = e.notaMX - e.deposito;
@@ -864,8 +864,7 @@ function renderCobranza() {
     let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
     let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
     let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
+    html += `<tr>
       <td>${i+1}</td>
       <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
       <td>${e.tienda}</td>
@@ -876,13 +875,13 @@ function renderCobranza() {
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
         <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
+      </div></td></tr>`;
   });
-  document.getElementById('cob_tot_pzas').textContent = totPzas;
-  document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
-  document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
-  let difEl = document.getElementById('cob_tot_dif');
+  dom.tbodyCobranza.innerHTML = html;
+  dom.cob_tot_pzas.textContent = totPzas;
+  dom.cob_tot_mxn.textContent = '$'+totMXN.toFixed(2);
+  dom.cob_tot_dep.textContent = '$'+totDep.toFixed(2);
+  let difEl = dom.cob_tot_dif;
   difEl.textContent = '$'+Math.abs(totDif).toFixed(2)+(totDif<0?' (a favor)':'');
   difEl.style.color = totDif > 0 ? 'var(--red)' : 'var(--green)';
 }
@@ -899,8 +898,7 @@ function renderDashboard() {
   let comTotal = db.ventas.reduce((s,v)=>s+(v.precioU*v.pzas*db.comision/100*v.tc),0);
   let clientesUnicos = new Set(db.ventas.map(v=>v.cliente)).size;
 
-  let sg = document.getElementById('statsGrid');
-  sg.innerHTML = `
+  dom.statsGrid.innerHTML = `
     <div class="stat blue"><div class="stat-icon">📦</div><div class="stat-label">Artículos</div><div class="stat-value">${arts}</div><div class="stat-sub">${clientesUnicos} clientes</div></div>
     <div class="stat teal"><div class="stat-icon">💵</div><div class="stat-label">Total USD</div><div class="stat-value">$${usd.toFixed(0)}</div><div class="stat-sub">Sin tax de tienda</div></div>
     <div class="stat blue"><div class="stat-icon">🏬</div><div class="stat-label">Costo Tienda MXN</div><div class="stat-value">$${total1.toFixed(0)}</div><div class="stat-sub">Total 1 (c/tax)</div></div>
@@ -910,11 +908,10 @@ function renderDashboard() {
     <div class="stat amber"><div class="stat-icon">🏷️</div><div class="stat-label">Comisión Shopper</div><div class="stat-value">$${comTotal.toFixed(0)}</div><div class="stat-sub">MXN (${db.comision}%)</div></div>`;
 
   // Semana resumen
-  let sem = document.getElementById('semanaResumen');
   let today = new Date().toISOString().slice(0,10);
   let ventasHoy = db.ventas.filter(v=>v.fecha===today).length;
   let utilidad = notaMX - total1 - comTotal;
-  sem.innerHTML = `
+  dom.semanaResumen.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div style="background:var(--bg);border-radius:10px;padding:10px;">
         <div style="font-size:11px;color:var(--text3);">Ventas hoy</div>
@@ -927,17 +924,15 @@ function renderDashboard() {
     </div>`;
 
   // Últimas ventas
-  let tbody = document.getElementById('tbodyRecientes');
-  tbody.innerHTML = '';
+  let html = '';
   db.ventas.slice(-10).reverse().forEach(v => {
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${v.fecha}</td><td><strong>${v.cliente}</strong></td><td>${v.tienda}</td>
+    html += `<tr><td>${v.fecha}</td><td><strong>${v.cliente}</strong></td><td>${v.tienda}</td>
       <td>${v.marca||''} ${v.producto} ${v.talla||''}</td>
       <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
       <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':'saldo-ok'}">$${Math.abs(v.dif).toFixed(2)}</td>`;
-    tbody.appendChild(tr);
+      <td class="${v.dif>0?'saldo-pend':'saldo-ok'}">$${Math.abs(v.dif).toFixed(2)}</td></tr>`;
   });
+  dom.tbodyRecientes.innerHTML = html;
 }
 
 // ======================== REPORTS ========================
@@ -1110,15 +1105,13 @@ function renderReport(tipo) {
 
 // ======================== DEP INDEP ========================
 function renderDepIndep() {
-  let tbody = document.getElementById('tbodyDepIndep');
-  tbody.innerHTML = '';
+  let html = '';
   db.depIndep.forEach((d,i) => {
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
+    html += `<tr><td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
       <td style="color:var(--green);font-weight:700;">$${d.monto.toFixed(2)}</td><td>${d.banco}</td>
-      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td>`;
-    tbody.appendChild(tr);
+      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td></tr>`;
   });
+  dom.tbodyDepIndep.innerHTML = html;
 }
 
 function deleteDepIndep(i) {
@@ -1150,15 +1143,14 @@ function renderChips(id, arr, onDel) {
 }
 
 function renderClientes() {
-  let tbody = document.getElementById('tbodyClientes');
+  let tbody = dom.tbodyClientes;
   if(!tbody) return;
-  tbody.innerHTML = '';
+  let html = '';
   db.clientes.forEach((c,i) => {
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
-      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td>`;
-    tbody.appendChild(tr);
+    html += `<tr><td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
+      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td></tr>`;
   });
+  tbody.innerHTML = html;
 }
 
 function deleteCli(i) {
@@ -1178,22 +1170,22 @@ function renderSocios() {
 
 function updateSelects() {
   ['f_tienda','d_tienda'].forEach(id=>{
-    let el = document.getElementById(id); if(!el) return;
+    let el = dom[id]; if(!el) return;
     let v = el.value;
     el.innerHTML = db.tiendas.map(t=>`<option>${t}</option>`).join('');
     if(db.tiendas.includes(v)) el.value = v;
   });
   ['f_shopper','d_shopper'].forEach(id=>{
-    let el = document.getElementById(id); if(!el) return;
+    let el = dom[id]; if(!el) return;
     let v = el.value;
     el.innerHTML = db.shoppers.map(s=>`<option>${s}</option>`).join('');
     if(db.shoppers.includes(v)) el.value = v;
   });
-  let fm = document.getElementById('f_marca');
+  let fm = dom.f_marca;
   if(fm) { let v=fm.value; fm.innerHTML = db.marcas.map(m=>`<option>${m}</option>`).join(''); if(db.marcas.includes(v))fm.value=v; }
   // filter selects
   ['filtroShopperV','filtroTiendaV','filtroTiendaCob'].forEach(id=>{
-    let el = document.getElementById(id); if(!el) return;
+    let el = dom[id]; if(!el) return;
     let v = el.value;
     let items = id.includes('Shopper') ? db.shoppers : db.tiendas;
     let first = id.includes('Shopper') ? '<option value="">Todos los shoppers</option>' : '<option value="">Todas las tiendas</option>';
@@ -1220,7 +1212,7 @@ function hhReset() {
 }
 function updateHHDisplay() {
   let m=Math.floor(hhSecs/60), s=hhSecs%60;
-  let el = document.getElementById('hhDisplay');
+  let el = dom.hhDisplay;
   if(el) el.textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
 }
 
@@ -1283,18 +1275,18 @@ function processVoice(txt) {
   setTimeout(()=>{ if(listening&&vb)vb.textContent='🎙️ Escuchando...'; },2000);
   if(txt==='siguiente'||txt==='siguiente campo'){
     let fields=['f_fecha','f_tienda','f_shopper','f_cliente','f_pzas','f_marca','f_producto','f_talla','f_precioUSD','f_tax','f_tc','f_deposito','f_banco'];
-    let active=document.activeElement;let idx=fields.findIndex(f=>document.getElementById(f)===active);
-    let next=document.getElementById(fields[(idx+1)%fields.length]);if(next)next.focus();return;
+    let active=document.activeElement;let idx=fields.findIndex(f=>dom[f]===active);
+    let next=dom[fields[(idx+1)%fields.length]];if(next)next.focus();return;
   }
   if(txt==='guardar'||txt==='agregar')document.getElementById('btnAgregarVenta').click();
   let m;
-  m=txt.match(/precio\s+(\d+(?:[.,]\d+)?)/);if(m){document.getElementById('f_precioUSD').value=parseFloat(m[1].replace(',','.'));updatePreview();return;}
-  m=txt.match(/depósito\s+(\d+(?:[.,]\d+)?)/);if(m){document.getElementById('f_deposito').value=parseFloat(m[1].replace(',','.'));updatePreview();return;}
-  m=txt.match(/piezas?\s+(\d+)/);if(m){document.getElementById('f_pzas').value=parseInt(m[1]);updatePreview();return;}
-  m=txt.match(/cliente\s+(\d{4})/);if(m){document.getElementById('f_cliente').value=m[1];return;}
-  m=txt.match(/talla\s+(\S+)/);if(m){document.getElementById('f_talla').value=m[1];return;}
-  m=txt.match(/producto\s+(.+)/);if(m){document.getElementById('f_producto').value=m[1];return;}
-  for(let ma of db.marcas){if(txt.includes(ma.toLowerCase())){document.getElementById('f_marca').value=ma;return;}}
+  m=txt.match(/precio\s+(\d+(?:[.,]\d+)?)/);if(m){dom.f_precioUSD.value=parseFloat(m[1].replace(',','.'));updatePreview();return;}
+  m=txt.match(/depósito\s+(\d+(?:[.,]\d+)?)/);if(m){dom.f_deposito.value=parseFloat(m[1].replace(',','.'));updatePreview();return;}
+  m=txt.match(/piezas?\s+(\d+)/);if(m){dom.f_pzas.value=parseInt(m[1]);updatePreview();return;}
+  m=txt.match(/cliente\s+(\d{4})/);if(m){dom.f_cliente.value=m[1];return;}
+  m=txt.match(/talla\s+(\S+)/);if(m){dom.f_talla.value=m[1];return;}
+  m=txt.match(/producto\s+(.+)/);if(m){dom.f_producto.value=m[1];return;}
+  for(let ma of db.marcas){if(txt.includes(ma.toLowerCase())){dom.f_marca.value=ma;return;}}
 }
 
 // ======================== PANEL NAV ========================
@@ -1306,7 +1298,7 @@ function showPanel(id) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   let ni = document.querySelector(`.nav-item[data-panel="${id}"]`);
   if(ni) ni.classList.add('active');
-  document.getElementById('pageTitle').textContent = panelTitles[id]||'';
+  dom.pageTitle.textContent = panelTitles[id]||'';
   // close sidebar on mobile
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('open');
@@ -1333,15 +1325,28 @@ function refreshAll() {
 // ======================== INIT ========================
 function initApp() {
   load();
+  // Cache DOM elements
+  const ids = [
+    'f_precioUSD', 'f_pzas', 'f_tax', 'f_tc', 'f_deposito', 'f_fecha', 'f_tienda', 'f_shopper', 'f_cliente', 'f_marca', 'f_producto', 'f_talla', 'f_banco',
+    'd_fecha', 'd_tienda', 'd_cliente', 'd_shopper', 'd_monto', 'd_banco',
+    'prev_totalUSD', 'prev_totalMXN', 'prev_notaMX', 'prev_dep', 'prev_dif',
+    'tbodyVentas', 'tbodyCobranza', 'tbodyRecientes', 'tbodyDepIndep', 'tbodyClientes',
+    'statsGrid', 'semanaResumen', 'bancosSummary',
+    'cob_tot_pzas', 'cob_tot_mxn', 'cob_tot_dep', 'cob_tot_dif',
+    'filtroVentas', 'filtroShopperV', 'filtroTiendaV', 'filtroCobranza', 'filtroTiendaCob',
+    'tcDisplay', 'comDisplay', 'taxDisplay', 'descHH', 'pageTitle', 'hhDisplay'
+  ];
+  ids.forEach(id => { dom[id] = document.getElementById(id); });
+
   // Init form defaults
-  document.getElementById('f_fecha').value = new Date().toISOString().slice(0,10);
-  document.getElementById('d_fecha').value = new Date().toISOString().slice(0,10);
-  document.getElementById('f_tc').value = db.tc;
-  document.getElementById('f_tax').value = db.taxUSA;
-  document.getElementById('tcDisplay').textContent = db.tc.toFixed(2);
-  document.getElementById('comDisplay').textContent = db.comision;
-  document.getElementById('taxDisplay').textContent = db.taxUSA;
-  document.getElementById('descHH').value = db.hh.desc;
+  dom.f_fecha.value = new Date().toISOString().slice(0,10);
+  dom.d_fecha.value = new Date().toISOString().slice(0,10);
+  dom.f_tc.value = db.tc;
+  dom.f_tax.value = db.taxUSA;
+  dom.tcDisplay.textContent = db.tc.toFixed(2);
+  dom.comDisplay.textContent = db.comision;
+  dom.taxDisplay.textContent = db.taxUSA;
+  dom.descHH.value = db.hh.desc;
   updateSelects();
   updateHHDisplay();
   if(hhRunning) hhStart();
@@ -1367,14 +1372,14 @@ document.querySelectorAll('.nav-item').forEach(ni=>ni.addEventListener('click',(
 document.getElementById('hamburger').onclick = ()=>{ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); };
 document.getElementById('sidebarOverlay').onclick = ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); };
 
-document.getElementById('badgeTC').onclick = ()=>{ let n=prompt('Nuevo tipo de cambio:',db.tc); if(n&&!isNaN(+n)){db.tc=+n;save();document.getElementById('tcDisplay').textContent=(+n).toFixed(2);document.getElementById('f_tc').value=+n;updatePreview();}};
-document.getElementById('badgeCom').onclick = ()=>{ let n=prompt('Nueva comisión %:',db.comision); if(n&&!isNaN(+n)){db.comision=+n;save();document.getElementById('comDisplay').textContent=+n;updatePreview();}};
-document.getElementById('badgeTax').onclick = ()=>{ let n=prompt('Tax USA % (ej. 8.25 para Texas):',db.taxUSA); if(n&&!isNaN(+n)){db.taxUSA=+n;save();document.getElementById('taxDisplay').textContent=+n;document.getElementById('f_tax').value=+n;updatePreview();}};
+document.getElementById('badgeTC').onclick = ()=>{ let n=prompt('Nuevo tipo de cambio:',db.tc); if(n&&!isNaN(+n)){db.tc=+n;save();dom.tcDisplay.textContent=(+n).toFixed(2);dom.f_tc.value=+n;updatePreview();}};
+document.getElementById('badgeCom').onclick = ()=>{ let n=prompt('Nueva comisión %:',db.comision); if(n&&!isNaN(+n)){db.comision=+n;save();dom.comDisplay.textContent=+n;updatePreview();}};
+document.getElementById('badgeTax').onclick = ()=>{ let n=prompt('Tax USA % (ej. 8.25 para Texas):',db.taxUSA); if(n&&!isNaN(+n)){db.taxUSA=+n;save();dom.taxDisplay.textContent=+n;dom.f_tax.value=+n;updatePreview();}};
 
 document.getElementById('btnIniciarHH').onclick = hhStart;
 document.getElementById('btnPausarHH').onclick = hhPause;
 document.getElementById('btnResetHH').onclick = hhReset;
-document.getElementById('btnAplicarHH').onclick = ()=>{ let d=parseFloat(document.getElementById('descHH').value)||0; db.hh.desc=Math.min(100,Math.max(0,d)); save(); updatePreview(); };
+document.getElementById('btnAplicarHH').onclick = ()=>{ let d=parseFloat(dom.descHH.value)||0; db.hh.desc=Math.min(100,Math.max(0,d)); save(); updatePreview(); };
 
 document.getElementById('btnAgregarVenta').onclick = ()=>addVenta(true);
 document.getElementById('btnGuardarNueva').onclick = ()=>addVenta(false);
@@ -1382,11 +1387,11 @@ document.getElementById('btnMic').onclick = toggleMic;
 document.getElementById('btnExportExcel').onclick = exportExcel;
 document.getElementById('btnLimpiarTodo').onclick = ()=>{ if(confirm('⚠️ Eliminar TODAS las ventas y depósitos?')){ db.ventas=[]; db.depIndep=[]; save(); refreshAll(); } };
 document.getElementById('btnRegistrarDep').onclick = ()=>{
-  let fecha=document.getElementById('d_fecha').value, tienda=document.getElementById('d_tienda').value;
-  let cliente=document.getElementById('d_cliente').value, shopper=document.getElementById('d_shopper').value;
-  let monto=parseFloat(document.getElementById('d_monto').value), banco=document.getElementById('d_banco').value;
+  let fecha=dom.d_fecha.value, tienda=dom.d_tienda.value;
+  let cliente=dom.d_cliente.value, shopper=dom.d_shopper.value;
+  let monto=parseFloat(dom.d_monto.value), banco=dom.d_banco.value;
   if(!fecha||!tienda||!cliente||!shopper||!(monto>0)){alert('Completa todos los campos');return;}
-  db.depIndep.push({fecha,tienda,cliente,shopper,monto,banco}); save(); document.getElementById('d_cliente').value=''; document.getElementById('d_monto').value=''; refreshAll();
+  db.depIndep.push({fecha,tienda,cliente,shopper,monto,banco}); save(); dom.d_cliente.value=''; dom.d_monto.value=''; refreshAll();
 };
 
 document.getElementById('btnGuardarEdit').onclick = saveEdit;
