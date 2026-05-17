@@ -575,6 +575,7 @@ let hhSecs = 0, hhRunning = false, hhInterval = null;
 let editIdx = null, pagoIdx = null, waClienteActual = null;
 let activePanel = 'dashboard';
 let activeReport = 'shoppers';
+let dom = {};
 
 // ======================== STORAGE ========================
 function save() {
@@ -773,53 +774,59 @@ function closeModal(id) {
 
 // ======================== RENDER VENTAS ========================
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
-  });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
+  let filtro = (dom.filtroVentas?.value || '').toLowerCase();
+  let filtroSh = dom.filtroShopperV?.value || '';
+  let filtroTi = dom.filtroTiendaV?.value || '';
+
+  // Create a filtered list that includes the original index to avoid O(n) indexOf calls
+  let filtered = db.ventas
+    .map((v, idx) => ({ v, idx }))
+    .filter(item => {
+      let v = item.v;
+      let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
+      let sh = !filtroSh || v.shopper === filtroSh;
+      let ti = !filtroTi || v.tienda === filtroTi;
+      return match && sh && ti;
+    });
+
+  // Batch DOM update using string concatenation
+  dom.tbodyVentas.innerHTML = filtered.map(item => {
+    let v = item.v;
+    let idx = item.idx;
     let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
     let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>#${v.id}</td>
-      <td>${v.fecha}</td>
-      <td>${v.tienda}</td>
-      <td>${v.cliente}</td>
-      <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
-      <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
-      <td>$${v.total1.toFixed(2)}</td>
-      <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
-      <td><span class="badge ${estado}">${estadoLabel}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+    return `
+      <tr>
+        <td>#${v.id}</td>
+        <td>${v.fecha}</td>
+        <td>${v.tienda}</td>
+        <td>${v.cliente}</td>
+        <td>${v.shopper}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca || ''} ${v.producto} ${v.talla || ''} x${v.pzas}</td>
+        <td>${v.pzas}</td>
+        <td>$${(v.precioU * v.pzas).toFixed(2)}</td>
+        <td>$${v.total1.toFixed(2)}</td>
+        <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
+        <td class="${v.dif > 0 ? 'saldo-pend' : (v.dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif < 0 ? ' ✓' : ''}</td>
+        <td>${v.banco || '-'}</td>
+        <td><span class="badge ${estado}">${estadoLabel}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
+            <button class="btn success xs" onclick="openPago(${idx})">💵</button>
+            <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
+            <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
 }
 
 // ======================== RENDER COBRANZA ========================
 function renderCobranza() {
-  let filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
-  let filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
+  let filtroCliente = (dom.filtroCobranza?.value || '').toLowerCase();
+  let filtroTienda = dom.filtroTiendaCob?.value || '';
 
   // Group by cliente
   let map = {};
@@ -844,8 +851,7 @@ function renderCobranza() {
   let bancos = {};
   db.ventas.forEach(v => { if(v.banco && v.deposito>0) { bancos[v.banco] = (bancos[v.banco]||0)+v.deposito; } });
   db.depIndep.forEach(d => { if(d.banco) { bancos[d.banco] = (bancos[d.banco]||0)+d.monto; } });
-  let bancosEl = document.getElementById('bancosSummary');
-  bancosEl.innerHTML = Object.entries(bancos).map(([b,m])=>`
+  dom.bancosSummary.innerHTML = Object.entries(bancos).map(([b,m])=>`
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
       <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
       <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
@@ -854,53 +860,55 @@ function renderCobranza() {
     return `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${total.toFixed(2)}</div></div>`;
   })();
 
-  // Table
-  let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
-  let totPzas=0, totMXN=0, totDep=0, totDif=0;
-  entries.forEach((e,i) => {
+  // Table - Batch DOM update using string concatenation
+  let totPzas = 0, totMXN = 0, totDep = 0, totDif = 0;
+  dom.tbodyCobranza.innerHTML = entries.map((e, i) => {
     let dif = e.notaMX - e.deposito;
-    totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
-    let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
-    let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
-    let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
-      <td>${e.tienda}</td>
-      <td>${e.pzas}</td>
-      <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
-      <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
-      <td><span class="badge ${estado}">${estadoL}</span></td>
-      <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('cob_tot_pzas').textContent = totPzas;
-  document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
-  document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
-  let difEl = document.getElementById('cob_tot_dif');
-  difEl.textContent = '$'+Math.abs(totDif).toFixed(2)+(totDif<0?' (a favor)':'');
-  difEl.style.color = totDif > 0 ? 'var(--red)' : 'var(--green)';
+    totPzas += e.pzas; totMXN += e.notaMX; totDep += e.deposito; totDif += dif;
+    let estado = dif <= 0 ? 'pagado' : (e.deposito > 0 ? 'parcial' : 'pendiente');
+    let estadoL = dif <= 0 ? 'Pagado' : (e.deposito > 0 ? 'Parcial' : 'Pendiente');
+    let cli = db.clientes.find(c => c.codigo === e.cliente);
+    return `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${e.cliente}</strong>${cli && cli.nombre ? `<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>` : ''}</td>
+        <td>${e.tienda}</td>
+        <td>${e.pzas}</td>
+        <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
+        <td class="${dif > 0 ? 'saldo-pend' : (dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif < 0 ? ' (a favor)' : ''}</td>
+        <td><span class="badge ${estado}">${estadoL}</span></td>
+        <td><div class="actions-cell">
+          <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        </div></td>
+      </tr>`;
+  }).join('');
+  dom.cob_tot_pzas.textContent = totPzas;
+  dom.cob_tot_mxn.textContent = '$'+totMXN.toFixed(2);
+  dom.cob_tot_dep.textContent = '$'+totDep.toFixed(2);
+  dom.cob_tot_dif.textContent = '$'+Math.abs(totDif).toFixed(2)+(totDif<0?' (a favor)':'');
+  dom.cob_tot_dif.style.color = totDif > 0 ? 'var(--red)' : 'var(--green)';
 }
 
 // ======================== DASHBOARD ========================
 function renderDashboard() {
-  let arts = db.ventas.reduce((s,v)=>s+v.pzas,0);
-  let usd = db.ventas.reduce((s,v)=>s+v.precioU*v.pzas,0);
-  let total1 = db.ventas.reduce((s,v)=>s+v.total1,0);
-  let notaMX = db.ventas.reduce((s,v)=>s+v.notaMX,0);
-  let dep = db.ventas.reduce((s,v)=>s+v.deposito,0);
-  let depIndep = db.depIndep.reduce((s,d)=>s+d.monto,0);
+  // Consolidate data processing into a single pass for performance
+  let arts = 0, usd = 0, total1 = 0, notaMX = 0, dep = 0, comTotal = 0;
+  let clientesSet = new Set();
+  db.ventas.forEach(v => {
+    arts += v.pzas;
+    usd += v.precioU * v.pzas;
+    total1 += v.total1;
+    notaMX += v.notaMX;
+    dep += v.deposito;
+    comTotal += (v.precioU * v.pzas * db.comision / 100 * v.tc);
+    clientesSet.add(v.cliente);
+  });
+  let depIndep = db.depIndep.reduce((s, d) => s + d.monto, 0);
   let saldo = notaMX - dep - depIndep;
-  let comTotal = db.ventas.reduce((s,v)=>s+(v.precioU*v.pzas*db.comision/100*v.tc),0);
-  let clientesUnicos = new Set(db.ventas.map(v=>v.cliente)).size;
+  let clientesUnicos = clientesSet.size;
 
-  let sg = document.getElementById('statsGrid');
-  sg.innerHTML = `
+  dom.statsGrid.innerHTML = `
     <div class="stat blue"><div class="stat-icon">📦</div><div class="stat-label">Artículos</div><div class="stat-value">${arts}</div><div class="stat-sub">${clientesUnicos} clientes</div></div>
     <div class="stat teal"><div class="stat-icon">💵</div><div class="stat-label">Total USD</div><div class="stat-value">$${usd.toFixed(0)}</div><div class="stat-sub">Sin tax de tienda</div></div>
     <div class="stat blue"><div class="stat-icon">🏬</div><div class="stat-label">Costo Tienda MXN</div><div class="stat-value">$${total1.toFixed(0)}</div><div class="stat-sub">Total 1 (c/tax)</div></div>
@@ -910,11 +918,10 @@ function renderDashboard() {
     <div class="stat amber"><div class="stat-icon">🏷️</div><div class="stat-label">Comisión Shopper</div><div class="stat-value">$${comTotal.toFixed(0)}</div><div class="stat-sub">MXN (${db.comision}%)</div></div>`;
 
   // Semana resumen
-  let sem = document.getElementById('semanaResumen');
   let today = new Date().toISOString().slice(0,10);
-  let ventasHoy = db.ventas.filter(v=>v.fecha===today).length;
+  let ventasHoy = db.ventas.filter(v => v.fecha === today).length;
   let utilidad = notaMX - total1 - comTotal;
-  sem.innerHTML = `
+  dom.semanaResumen.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
       <div style="background:var(--bg);border-radius:10px;padding:10px;">
         <div style="font-size:11px;color:var(--text3);">Ventas hoy</div>
@@ -926,18 +933,17 @@ function renderDashboard() {
       </div>
     </div>`;
 
-  // Últimas ventas
-  let tbody = document.getElementById('tbodyRecientes');
-  tbody.innerHTML = '';
-  db.ventas.slice(-10).reverse().forEach(v => {
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${v.fecha}</td><td><strong>${v.cliente}</strong></td><td>${v.tienda}</td>
-      <td>${v.marca||''} ${v.producto} ${v.talla||''}</td>
+  // Últimas ventas - use string concatenation for batch DOM update
+  dom.tbodyRecientes.innerHTML = db.ventas.slice(-10).reverse().map(v => `
+    <tr>
+      <td>${v.fecha}</td>
+      <td><strong>${v.cliente}</strong></td>
+      <td>${v.tienda}</td>
+      <td>${v.marca || ''} ${v.producto} ${v.talla || ''}</td>
       <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
       <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':'saldo-ok'}">$${Math.abs(v.dif).toFixed(2)}</td>`;
-    tbody.appendChild(tr);
-  });
+      <td class="${v.dif > 0 ? 'saldo-pend' : 'saldo-ok'}">$${Math.abs(v.dif).toFixed(2)}</td>
+    </tr>`).join('');
 }
 
 // ======================== REPORTS ========================
@@ -1306,7 +1312,7 @@ function showPanel(id) {
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   let ni = document.querySelector(`.nav-item[data-panel="${id}"]`);
   if(ni) ni.classList.add('active');
-  document.getElementById('pageTitle').textContent = panelTitles[id]||'';
+  dom.pageTitle.textContent = panelTitles[id]||'';
   // close sidebar on mobile
   document.getElementById('sidebar').classList.remove('open');
   document.getElementById('sidebarOverlay').classList.remove('open');
@@ -1332,6 +1338,24 @@ function refreshAll() {
 
 // ======================== INIT ========================
 function initApp() {
+  // Cache frequently used DOM elements
+  dom.statsGrid = document.getElementById('statsGrid');
+  dom.semanaResumen = document.getElementById('semanaResumen');
+  dom.tbodyRecientes = document.getElementById('tbodyRecientes');
+  dom.tbodyVentas = document.getElementById('tbodyVentas');
+  dom.tbodyCobranza = document.getElementById('tbodyCobranza');
+  dom.filtroVentas = document.getElementById('filtroVentas');
+  dom.filtroShopperV = document.getElementById('filtroShopperV');
+  dom.filtroTiendaV = document.getElementById('filtroTiendaV');
+  dom.filtroCobranza = document.getElementById('filtroCobranza');
+  dom.filtroTiendaCob = document.getElementById('filtroTiendaCob');
+  dom.bancosSummary = document.getElementById('bancosSummary');
+  dom.cob_tot_pzas = document.getElementById('cob_tot_pzas');
+  dom.cob_tot_mxn = document.getElementById('cob_tot_mxn');
+  dom.cob_tot_dep = document.getElementById('cob_tot_dep');
+  dom.cob_tot_dif = document.getElementById('cob_tot_dif');
+  dom.pageTitle = document.getElementById('pageTitle');
+
   load();
   // Init form defaults
   document.getElementById('f_fecha').value = new Date().toISOString().slice(0,10);
