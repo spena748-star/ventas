@@ -772,64 +772,82 @@ function closeModal(id) {
 }
 
 // ======================== RENDER VENTAS ========================
+/**
+ * Optimized renderVentas:
+ * 1. Pre-calculate original indices to avoid O(N^2) indexOf calls.
+ * 2. Build entire HTML string first to avoid repeated DOM insertions.
+ */
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
+  const filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
+  const filtroSh = document.getElementById('filtroShopperV')?.value||'';
+  const filtroTi = document.getElementById('filtroTiendaV')?.value||'';
+  const tbody = document.getElementById('tbodyVentas');
+
+  if (!tbody) return;
+
+  // Map ventas with their original indices to avoid indexOf in the loop
+  const indexedVentas = db.ventas.map((v, idx) => ({ ...v, originalIdx: idx }));
+
+  const filtered = indexedVentas.filter(v => {
+    const match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
+    const sh = !filtroSh || v.shopper === filtroSh;
+    const ti = !filtroTi || v.tienda === filtroTi;
     return match && sh && ti;
   });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
-    let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
-    let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>#${v.id}</td>
-      <td>${v.fecha}</td>
-      <td>${v.tienda}</td>
-      <td>${v.cliente}</td>
-      <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
-      <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
-      <td>$${v.total1.toFixed(2)}</td>
-      <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
-      <td><span class="badge ${estado}">${estadoLabel}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
+
+  let html = '';
+  filtered.forEach(v => {
+    const estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
+    const estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
+
+    html += `
+      <tr>
+        <td>#${v.id}</td>
+        <td>${v.fecha}</td>
+        <td>${v.tienda}</td>
+        <td>${v.cliente}</td>
+        <td>${v.shopper}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
+        <td>${v.pzas}</td>
+        <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
+        <td>$${v.total1.toFixed(2)}</td>
+        <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
+        <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
+        <td>${v.banco||'-'}</td>
+        <td><span class="badge ${estado}">${estadoLabel}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn outline xs" onclick="openEdit(${v.originalIdx})" title="Editar venta" aria-label="Editar venta">✏️</button>
+            <button class="btn success xs" onclick="openPago(${v.originalIdx})" title="Registrar pago" aria-label="Registrar pago">💵</button>
+            <button class="btn primary xs" onclick="openWA('${v.cliente}')" title="Enviar WhatsApp" aria-label="Enviar WhatsApp">📲</button>
+            <button class="btn danger xs" onclick="deleteVenta(${v.originalIdx})" title="Eliminar venta" aria-label="Eliminar venta">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
   });
+
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
+/**
+ * Optimized renderCobranza:
+ * 1. Batch DOM updates by building HTML strings for bank summary and table body.
+ * 2. Improve performance of client lookups by creating a temporary map.
+ */
 function renderCobranza() {
-  let filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
-  let filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
+  const filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
+  const filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
 
   // Group by cliente
-  let map = {};
+  const map = {};
   db.ventas.forEach(v => {
     if(filtroTienda && v.tienda !== filtroTienda) return;
-    if(!map[v.cliente]) map[v.cliente] = {cliente:v.cliente, tienda:v.tienda, pzas:0, notaMX:0, deposito:0, ventas:[]};
+    if(!map[v.cliente]) map[v.cliente] = {cliente:v.cliente, tienda:v.tienda, pzas:0, notaMX:0, deposito:0};
     map[v.cliente].pzas += v.pzas;
     map[v.cliente].notaMX += v.notaMX;
     map[v.cliente].deposito += v.deposito;
-    map[v.cliente].ventas.push(v);
   });
   // Add dep independientes
   db.depIndep.forEach(d => {
@@ -837,54 +855,68 @@ function renderCobranza() {
     if(map[d.cliente]) { map[d.cliente].deposito += d.monto; }
   });
 
-  let entries = Object.values(map).filter(e => !filtroCliente || e.cliente.includes(filtroCliente));
+  const entries = Object.values(map).filter(e => !filtroCliente || e.cliente.includes(filtroCliente));
   entries.sort((a,b) => a.cliente.localeCompare(b.cliente));
 
   // Bank totals
-  let bancos = {};
+  const bancos = {};
   db.ventas.forEach(v => { if(v.banco && v.deposito>0) { bancos[v.banco] = (bancos[v.banco]||0)+v.deposito; } });
   db.depIndep.forEach(d => { if(d.banco) { bancos[d.banco] = (bancos[d.banco]||0)+d.monto; } });
-  let bancosEl = document.getElementById('bancosSummary');
-  bancosEl.innerHTML = Object.entries(bancos).map(([b,m])=>`
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
-      <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
-    </div>`).join('') + (() => {
-    let total = Object.values(bancos).reduce((s,v)=>s+v,0);
-    return `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${total.toFixed(2)}</div></div>`;
-  })();
+
+  const bancosEl = document.getElementById('bancosSummary');
+  if (bancosEl) {
+    let bancosHtml = Object.entries(bancos).map(([b,m])=>`
+      <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
+        <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
+      </div>`).join('');
+
+    const totalBancos = Object.values(bancos).reduce((s,v)=>s+v,0);
+    bancosHtml += `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${totalBancos.toFixed(2)}</div></div>`;
+
+    bancosEl.innerHTML = bancosHtml;
+  }
+
+  // Create client map for O(1) lookups
+  const clientMap = {};
+  db.clientes.forEach(c => { clientMap[c.codigo] = c; });
 
   // Table
-  let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
-  let totPzas=0, totMXN=0, totDep=0, totDif=0;
-  entries.forEach((e,i) => {
-    let dif = e.notaMX - e.deposito;
-    totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
-    let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
-    let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
-    let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
-      <td>${e.tienda}</td>
-      <td>${e.pzas}</td>
-      <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
-      <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
-      <td><span class="badge ${estado}">${estadoL}</span></td>
-      <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
-  });
-  document.getElementById('cob_tot_pzas').textContent = totPzas;
-  document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
-  document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
-  let difEl = document.getElementById('cob_tot_dif');
-  difEl.textContent = '$'+Math.abs(totDif).toFixed(2)+(totDif<0?' (a favor)':'');
-  difEl.style.color = totDif > 0 ? 'var(--red)' : 'var(--green)';
+  const tbody = document.getElementById('tbodyCobranza');
+  if (tbody) {
+    let tbodyHtml = '';
+    let totPzas=0, totMXN=0, totDep=0, totDif=0;
+    entries.forEach((e,i) => {
+      const dif = e.notaMX - e.deposito;
+      totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
+      const estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
+      const estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
+      const cli = clientMap[e.cliente];
+
+      tbodyHtml += `
+        <tr>
+          <td>${i+1}</td>
+          <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
+          <td>${e.tienda}</td>
+          <td>${e.pzas}</td>
+          <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
+          <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
+          <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
+          <td><span class="badge ${estado}">${estadoL}</span></td>
+          <td><div class="actions-cell">
+            <button class="btn primary xs" onclick="openWA('${e.cliente}')" title="Enviar WhatsApp" aria-label="Enviar WhatsApp">📲</button>
+          </div></td>
+        </tr>`;
+    });
+    tbody.innerHTML = tbodyHtml;
+
+    document.getElementById('cob_tot_pzas').textContent = totPzas;
+    document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
+    document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
+    const difEl = document.getElementById('cob_tot_dif');
+    difEl.textContent = '$'+Math.abs(totDif).toFixed(2)+(totDif<0?' (a favor)':'');
+    difEl.style.color = totDif > 0 ? 'var(--red)' : 'var(--green)';
+  }
 }
 
 // ======================== DASHBOARD ========================
