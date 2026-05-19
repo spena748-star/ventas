@@ -773,53 +773,60 @@ function closeModal(id) {
 
 // ======================== RENDER VENTAS ========================
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
-  });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
-    let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
-    let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>#${v.id}</td>
-      <td>${v.fecha}</td>
-      <td>${v.tienda}</td>
-      <td>${v.cliente}</td>
-      <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
-      <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
-      <td>$${v.total1.toFixed(2)}</td>
-      <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
-      <td><span class="badge ${estado}">${estadoLabel}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+  const filtro = (dom.filtroVentas?.value || '').toLowerCase();
+  const filtroSh = dom.filtroShopperV?.value || '';
+  const filtroTi = dom.filtroTiendaV?.value || '';
+  const tbody = dom.tbodyVentas;
+
+  // Optimization: Map with original index to avoid O(N^2) with indexOf later
+  // Optimization: Use single-pass filter and map
+  let html = '';
+  db.ventas
+    .map((v, originalIdx) => ({ ...v, originalIdx }))
+    .filter(v => {
+      const match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
+      const sh = !filtroSh || v.shopper === filtroSh;
+      const ti = !filtroTi || v.tienda === filtroTi;
+      return match && sh && ti;
+    })
+    .forEach(v => {
+      const estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
+      const estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
+      // Optimization: Batch HTML updates into a single innerHTML assignment
+      html += `
+      <tr>
+        <td>#${v.id}</td>
+        <td>${v.fecha}</td>
+        <td>${v.tienda}</td>
+        <td>${v.cliente}</td>
+        <td>${v.shopper}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca || ''} ${v.producto} ${v.talla || ''} x${v.pzas}</td>
+        <td>${v.pzas}</td>
+        <td>$${(v.precioU * v.pzas).toFixed(2)}</td>
+        <td>$${v.total1.toFixed(2)}</td>
+        <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
+        <td class="${v.dif > 0 ? 'saldo-pend' : (v.dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif < 0 ? ' ✓' : ''}</td>
+        <td>${v.banco || '-'}</td>
+        <td><span class="badge ${estado}">${estadoLabel}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn outline xs" onclick="openEdit(${v.originalIdx})">✏️</button>
+            <button class="btn success xs" onclick="openPago(${v.originalIdx})">💵</button>
+            <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
+            <button class="btn danger xs" onclick="deleteVenta(${v.originalIdx})">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    });
+
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
 function renderCobranza() {
-  let filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
-  let filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
+  const filtroCliente = (dom.filtroCobranza?.value || '').toLowerCase();
+  const filtroTienda = dom.filtroTiendaCob?.value || '';
 
   // Group by cliente
   let map = {};
@@ -855,30 +862,32 @@ function renderCobranza() {
   })();
 
   // Table
-  let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
-  let totPzas=0, totMXN=0, totDep=0, totDif=0;
-  entries.forEach((e,i) => {
-    let dif = e.notaMX - e.deposito;
-    totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
-    let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
-    let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
-    let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
-      <td>${e.tienda}</td>
-      <td>${e.pzas}</td>
-      <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
-      <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
-      <td><span class="badge ${estado}">${estadoL}</span></td>
-      <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
+  const tbody = dom.tbodyCobranza;
+  let totPzas = 0, totMXN = 0, totDep = 0, totDif = 0;
+  // Optimization: Construct HTML string for batched update
+  let html = '';
+  entries.forEach((e, i) => {
+    const dif = e.notaMX - e.deposito;
+    totPzas += e.pzas; totMXN += e.notaMX; totDep += e.deposito; totDif += dif;
+    const estado = dif <= 0 ? 'pagado' : (e.deposito > 0 ? 'parcial' : 'pendiente');
+    const estadoL = dif <= 0 ? 'Pagado' : (e.deposito > 0 ? 'Parcial' : 'Pendiente');
+    const cli = db.clientes.find(c => c.codigo === e.cliente);
+    html += `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${e.cliente}</strong>${cli && cli.nombre ? `<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>` : ''}</td>
+        <td>${e.tienda}</td>
+        <td>${e.pzas}</td>
+        <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
+        <td class="${dif > 0 ? 'saldo-pend' : (dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif < 0 ? ' (a favor)' : ''}</td>
+        <td><span class="badge ${estado}">${estadoL}</span></td>
+        <td><div class="actions-cell">
+          <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        </div></td>
+      </tr>`;
   });
+  tbody.innerHTML = html;
   document.getElementById('cob_tot_pzas').textContent = totPzas;
   document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
   document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
@@ -899,7 +908,7 @@ function renderDashboard() {
   let comTotal = db.ventas.reduce((s,v)=>s+(v.precioU*v.pzas*db.comision/100*v.tc),0);
   let clientesUnicos = new Set(db.ventas.map(v=>v.cliente)).size;
 
-  let sg = document.getElementById('statsGrid');
+  const sg = dom.statsGrid;
   sg.innerHTML = `
     <div class="stat blue"><div class="stat-icon">📦</div><div class="stat-label">Artículos</div><div class="stat-value">${arts}</div><div class="stat-sub">${clientesUnicos} clientes</div></div>
     <div class="stat teal"><div class="stat-icon">💵</div><div class="stat-label">Total USD</div><div class="stat-value">$${usd.toFixed(0)}</div><div class="stat-sub">Sin tax de tienda</div></div>
@@ -910,7 +919,7 @@ function renderDashboard() {
     <div class="stat amber"><div class="stat-icon">🏷️</div><div class="stat-label">Comisión Shopper</div><div class="stat-value">$${comTotal.toFixed(0)}</div><div class="stat-sub">MXN (${db.comision}%)</div></div>`;
 
   // Semana resumen
-  let sem = document.getElementById('semanaResumen');
+  const sem = dom.semanaResumen;
   let today = new Date().toISOString().slice(0,10);
   let ventasHoy = db.ventas.filter(v=>v.fecha===today).length;
   let utilidad = notaMX - total1 - comTotal;
@@ -927,17 +936,17 @@ function renderDashboard() {
     </div>`;
 
   // Últimas ventas
-  let tbody = document.getElementById('tbodyRecientes');
-  tbody.innerHTML = '';
+  const tbody = dom.tbodyRecientes;
+  // Optimization: Construct HTML string for batched update
+  let html = '';
   db.ventas.slice(-10).reverse().forEach(v => {
-    let tr = document.createElement('tr');
-    tr.innerHTML = `<td>${v.fecha}</td><td><strong>${v.cliente}</strong></td><td>${v.tienda}</td>
-      <td>${v.marca||''} ${v.producto} ${v.talla||''}</td>
+    html += `<tr><td>${v.fecha}</td><td><strong>${v.cliente}</strong></td><td>${v.tienda}</td>
+      <td>${v.marca || ''} ${v.producto} ${v.talla || ''}</td>
       <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
       <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':'saldo-ok'}">$${Math.abs(v.dif).toFixed(2)}</td>`;
-    tbody.appendChild(tr);
+      <td class="${v.dif > 0 ? 'saldo-pend' : 'saldo-ok'}">$${Math.abs(v.dif).toFixed(2)}</td></tr>`;
   });
+  tbody.innerHTML = html;
 }
 
 // ======================== REPORTS ========================
@@ -1330,8 +1339,19 @@ function refreshAll() {
   updateSelects();
 }
 
+// ======================== DOM CACHE ========================
+const dom = {};
+function cacheDom() {
+  const ids = [
+    'tbodyVentas', 'tbodyCobranza', 'tbodyRecientes', 'statsGrid', 'semanaResumen',
+    'filtroVentas', 'filtroShopperV', 'filtroTiendaV', 'filtroCobranza', 'filtroTiendaCob'
+  ];
+  ids.forEach(id => { dom[id] = document.getElementById(id); });
+}
+
 // ======================== INIT ========================
 function initApp() {
+  cacheDom();
   load();
   // Init form defaults
   document.getElementById('f_fecha').value = new Date().toISOString().slice(0,10);
