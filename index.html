@@ -26,6 +26,7 @@
   --header-h: 60px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+:focus-visible{outline:3px solid var(--blue-light);outline-offset:2px;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* LOGIN */
@@ -230,25 +231,25 @@ tbody tr:hover{background:#f8fafc;}
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
   <div class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-      <span class="icon">🛍️</span>
+      <span class="icon" aria-hidden="true">🛍️</span>
       <div><div class="name">Admin Ventas</div><div class="version">Sistema Pro</div></div>
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" role="button" tabindex="0"><span class="ni" aria-hidden="true">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" role="button" tabindex="0"><span class="ni" aria-hidden="true">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" role="button" tabindex="0"><span class="ni" aria-hidden="true">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" role="button" tabindex="0"><span class="ni" aria-hidden="true">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" role="button" tabindex="0"><span class="ni" aria-hidden="true">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" role="button" tabindex="0"><span class="ni" aria-hidden="true">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" role="button" tabindex="0"><span class="ni" aria-hidden="true">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" role="button" tabindex="0"><span class="ni" aria-hidden="true">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
-      <button id="btnSalir">🚪 Cerrar sesión</button>
+      <button id="btnSalir"><span aria-hidden="true">🚪</span> Cerrar sesión</button>
     </div>
   </div>
 
@@ -256,13 +257,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú"><span aria-hidden="true">☰</span></button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" title="Clic para editar" role="button" tabindex="0" aria-label="Editar tipo de cambio"><span aria-hidden="true">💱</span> TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" title="Clic para editar" role="button" tabindex="0" aria-label="Editar porcentaje de comisión">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" title="Clic para editar" role="button" tabindex="0" aria-label="Editar tax de USA"><span aria-hidden="true">🏷️</span> Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +807,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" title="Editar venta" aria-label="Editar venta">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" title="Registrar pago" aria-label="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" title="Enviar resumen por WhatsApp" aria-label="Enviar resumen por WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" title="Eliminar venta" aria-label="Eliminar venta">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -875,7 +876,7 @@ function renderCobranza() {
       <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        <button class="btn primary xs" onclick="openWA('${e.cliente}')" title="Enviar resumen por WhatsApp" aria-label="Enviar resumen por WhatsApp">📲</button>
       </div></td>`;
     tbody.appendChild(tr);
   });
@@ -1144,7 +1145,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" title="Eliminar" aria-label="Eliminar">×</button>`;
     el.appendChild(c);
   });
 }
@@ -1363,13 +1364,24 @@ document.getElementById('btnLogin').onclick = () => {
 document.getElementById('loginPass').addEventListener('keypress',e=>{if(e.key==='Enter')document.getElementById('btnLogin').click();});
 document.getElementById('btnSalir').onclick = ()=>{ stopMic(); hhPause(); document.getElementById('loginScreen').style.display='flex'; document.getElementById('app').style.display='none'; };
 
-document.querySelectorAll('.nav-item').forEach(ni=>ni.addEventListener('click',()=>showPanel(ni.dataset.panel)));
+document.querySelectorAll('.nav-item').forEach(ni=>{
+  ni.addEventListener('click',()=>showPanel(ni.dataset.panel));
+  ni.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); ni.click(); } });
+});
 document.getElementById('hamburger').onclick = ()=>{ document.getElementById('sidebar').classList.add('open'); document.getElementById('sidebarOverlay').classList.add('open'); };
 document.getElementById('sidebarOverlay').onclick = ()=>{ document.getElementById('sidebar').classList.remove('open'); document.getElementById('sidebarOverlay').classList.remove('open'); };
 
-document.getElementById('badgeTC').onclick = ()=>{ let n=prompt('Nuevo tipo de cambio:',db.tc); if(n&&!isNaN(+n)){db.tc=+n;save();document.getElementById('tcDisplay').textContent=(+n).toFixed(2);document.getElementById('f_tc').value=+n;updatePreview();}};
-document.getElementById('badgeCom').onclick = ()=>{ let n=prompt('Nueva comisión %:',db.comision); if(n&&!isNaN(+n)){db.comision=+n;save();document.getElementById('comDisplay').textContent=+n;updatePreview();}};
-document.getElementById('badgeTax').onclick = ()=>{ let n=prompt('Tax USA % (ej. 8.25 para Texas):',db.taxUSA); if(n&&!isNaN(+n)){db.taxUSA=+n;save();document.getElementById('taxDisplay').textContent=+n;document.getElementById('f_tax').value=+n;updatePreview();}};
+const handleBadgeTC = ()=>{ let n=prompt('Nuevo tipo de cambio:',db.tc); if(n&&!isNaN(+n)){db.tc=+n;save();document.getElementById('tcDisplay').textContent=(+n).toFixed(2);document.getElementById('f_tc').value=+n;updatePreview();}};
+document.getElementById('badgeTC').onclick = handleBadgeTC;
+document.getElementById('badgeTC').onkeydown = e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); handleBadgeTC(); } };
+
+const handleBadgeCom = ()=>{ let n=prompt('Nueva comisión %:',db.comision); if(n&&!isNaN(+n)){db.comision=+n;save();document.getElementById('comDisplay').textContent=+n;updatePreview();}};
+document.getElementById('badgeCom').onclick = handleBadgeCom;
+document.getElementById('badgeCom').onkeydown = e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); handleBadgeCom(); } };
+
+const handleBadgeTax = ()=>{ let n=prompt('Tax USA % (ej. 8.25 para Texas):',db.taxUSA); if(n&&!isNaN(+n)){db.taxUSA=+n;save();document.getElementById('taxDisplay').textContent=+n;document.getElementById('f_tax').value=+n;updatePreview();}};
+document.getElementById('badgeTax').onclick = handleBadgeTax;
+document.getElementById('badgeTax').onkeydown = e=>{ if(e.key==='Enter'||e.key===' ') { e.preventDefault(); handleBadgeTax(); } };
 
 document.getElementById('btnIniciarHH').onclick = hhStart;
 document.getElementById('btnPausarHH').onclick = hhPause;
