@@ -777,19 +777,21 @@ function renderVentas() {
   let filtroSh = document.getElementById('filtroShopperV')?.value||'';
   let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
   let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
-  });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
+
+  // Optimization: Pre-map with original indices to avoid O(N^2) indexOf calls and batch DOM updates
+  let filtered = db.ventas
+    .map((v, idx) => ({ ...v, originalIdx: idx }))
+    .filter(v => {
+      let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
+      let sh = !filtroSh || v.shopper === filtroSh;
+      let ti = !filtroTi || v.tienda === filtroTi;
+      return match && sh && ti;
+    });
+
+  let html = filtered.map(v => {
     let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
     let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
+    return `<tr>
       <td>#${v.id}</td>
       <td>${v.fecha}</td>
       <td>${v.tienda}</td>
@@ -806,14 +808,16 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
+          <button class="btn outline xs" onclick="openEdit(${v.originalIdx})">✏️</button>
+          <button class="btn success xs" onclick="openPago(${v.originalIdx})">💵</button>
           <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn danger xs" onclick="deleteVenta(${v.originalIdx})">🗑️</button>
         </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+      </td>
+    </tr>`;
+  }).join('');
+
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
@@ -856,16 +860,16 @@ function renderCobranza() {
 
   // Table
   let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
   let totPzas=0, totMXN=0, totDep=0, totDif=0;
-  entries.forEach((e,i) => {
+
+  // Optimization: Batch DOM updates using string concatenation
+  let html = entries.map((e, i) => {
     let dif = e.notaMX - e.deposito;
     totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
     let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
     let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
     let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
+    return `<tr>
       <td>${i+1}</td>
       <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
       <td>${e.tienda}</td>
@@ -876,9 +880,10 @@ function renderCobranza() {
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
         <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
-  });
+      </div></td>
+    </tr>`;
+  }).join('');
+  tbody.innerHTML = html;
   document.getElementById('cob_tot_pzas').textContent = totPzas;
   document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
   document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
