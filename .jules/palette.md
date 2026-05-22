@@ -1,0 +1,3 @@
+## 2024-05-22 - Accessibility and Keyboard Support
+**Learning:** Non-semantic interactive elements like <span> badges and <div> navigation items require explicit ARIA roles and tabindex to be discoverable and usable by keyboard and screen reader users.
+**Action:** Always add role="button", tabindex="0", and a global keydown listener (Enter/Space) to these elements. Ensure icon-only buttons have descriptive aria-label and title attributes.
