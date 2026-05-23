@@ -207,6 +207,17 @@ tbody tr:hover{background:#f8fafc;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* FOCUS VISIBLE */
+:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2);
+}
+[role="button"]:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: -2px;
+}
 </style>
 </head>
 <body>
@@ -235,17 +246,17 @@ tbody tr:hover{background:#f8fafc;}
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" role="button" tabindex="0"><span class="ni" aria-hidden="true">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" role="button" tabindex="0"><span class="ni" aria-hidden="true">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" role="button" tabindex="0"><span class="ni" aria-hidden="true">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" role="button" tabindex="0"><span class="ni" aria-hidden="true">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" role="button" tabindex="0"><span class="ni" aria-hidden="true">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" role="button" tabindex="0"><span class="ni" aria-hidden="true">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" role="button" tabindex="0"><span class="ni" aria-hidden="true">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" role="button" tabindex="0"><span class="ni" aria-hidden="true">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
       <button id="btnSalir">🚪 Cerrar sesión</button>
@@ -256,13 +267,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú lateral">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" title="Clic para editar" role="button" tabindex="0">💱 TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" title="Clic para editar" role="button" tabindex="0">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" title="Clic para editar" role="button" tabindex="0">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +817,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar venta">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="Enviar WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar venta">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -875,7 +886,7 @@ function renderCobranza() {
       <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        <button class="btn primary xs" onclick="openWA('${e.cliente}')" aria-label="Enviar WhatsApp">📲</button>
       </div></td>`;
     tbody.appendChild(tr);
   });
@@ -1116,7 +1127,7 @@ function renderDepIndep() {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
       <td style="color:var(--green);font-weight:700;">$${d.monto.toFixed(2)}</td><td>${d.banco}</td>
-      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})" aria-label="Eliminar depósito">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1144,7 +1155,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" aria-label="Eliminar ${item}">×</button>`;
     el.appendChild(c);
   });
 }
@@ -1156,7 +1167,7 @@ function renderClientes() {
   db.clientes.forEach((c,i) => {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
-      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteCli(${i})" aria-label="Eliminar cliente">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1333,6 +1344,15 @@ function refreshAll() {
 // ======================== INIT ========================
 function initApp() {
   load();
+
+  // Global keyboard listener for role="button"
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
+
   // Init form defaults
   document.getElementById('f_fecha').value = new Date().toISOString().slice(0,10);
   document.getElementById('d_fecha').value = new Date().toISOString().slice(0,10);
