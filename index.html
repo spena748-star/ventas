@@ -207,6 +207,12 @@ tbody tr:hover{background:#f8fafc;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* ACCESSIBILITY: Focus states */
+*:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 2px;
+}
 </style>
 </head>
 <body>
@@ -235,17 +241,17 @@ tbody tr:hover{background:#f8fafc;}
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" role="button" tabindex="0"><span class="ni">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" role="button" tabindex="0"><span class="ni">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" role="button" tabindex="0"><span class="ni">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" role="button" tabindex="0"><span class="ni">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" role="button" tabindex="0"><span class="ni">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" role="button" tabindex="0"><span class="ni">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" role="button" tabindex="0"><span class="ni">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" role="button" tabindex="0"><span class="ni">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
       <button id="btnSalir">🚪 Cerrar sesión</button>
@@ -1347,6 +1353,14 @@ function initApp() {
   if(hhRunning) hhStart();
   renderDashboard();
   updatePreview();
+
+  // Global keyboard listener for role="button"
+  window.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
 
   // Cross-tab sync
   window.addEventListener('storage', (e)=>{
