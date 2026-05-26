@@ -1,0 +1,3 @@
+## 2024-05-26 - Optimized O(N^2) Table Rendering
+**Learning:** The application was performing an `indexOf` lookup inside a render loop for a filtered list of items. This resulted in O(N*M) complexity (where N is total items and M is filtered items), which became a significant bottleneck as the data size increased (e.g., 5000+ items). Additionally, incremental `appendChild` calls in a loop caused excessive reflows.
+**Action:** Always pre-map data with original indices before filtering if those indices are needed for actions. Batch DOM updates using string concatenation or `DocumentFragment` to minimize reflows.
