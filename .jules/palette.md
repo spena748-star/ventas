@@ -1,0 +1,3 @@
+## 2024-05-28 - Comprehensive Accessibility and Keyboard Navigation Improvements
+**Learning:** Using non-semantic elements (like `div` or `span`) as interactive components requires explicit `role="button"` and `tabindex="0"` to be accessible to screen readers and keyboard users. Additionally, a global keyboard listener is essential to handle 'Enter' and 'Space' activation for these elements, as browsers do not provide this behavior by default for non-native buttons.
+**Action:** Always ensure that interactive elements have the correct ARIA roles and are focusable. Implement a global keyboard listener for `role="button"` elements in the main application initialization.
