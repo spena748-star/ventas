@@ -777,43 +777,46 @@ function renderVentas() {
   let filtroSh = document.getElementById('filtroShopperV')?.value||'';
   let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
   let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
+
+  // BOLT: Batching innerHTML updates and using O(1) index lookup
+  let html = '';
+  let filtered = db.ventas.map((v, i) => ({v, i})).filter(({v}) => {
     let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
     let sh = !filtroSh || v.shopper === filtroSh;
     let ti = !filtroTi || v.tienda === filtroTi;
     return match && sh && ti;
   });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
+
+  filtered.forEach(({v, i: idx}) => {
     let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
     let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>#${v.id}</td>
-      <td>${v.fecha}</td>
-      <td>${v.tienda}</td>
-      <td>${v.cliente}</td>
-      <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
-      <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
-      <td>$${v.total1.toFixed(2)}</td>
-      <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
-      <td><span class="badge ${estado}">${estadoLabel}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
+    html += `
+      <tr>
+        <td>#${v.id}</td>
+        <td>${v.fecha}</td>
+        <td>${v.tienda}</td>
+        <td>${v.cliente}</td>
+        <td>${v.shopper}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
+        <td>${v.pzas}</td>
+        <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
+        <td>$${v.total1.toFixed(2)}</td>
+        <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
+        <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
+        <td>${v.banco||'-'}</td>
+        <td><span class="badge ${estado}">${estadoLabel}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
+            <button class="btn success xs" onclick="openPago(${idx})">💵</button>
+            <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
+            <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
   });
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
@@ -856,29 +859,34 @@ function renderCobranza() {
 
   // Table
   let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
+
+  // BOLT: Batching innerHTML updates and using O(1) client lookup
+  let htmlCob = '';
+  let clientMap = db.clientes.reduce((acc, c) => { acc[c.codigo] = c; return acc; }, {});
+
   let totPzas=0, totMXN=0, totDep=0, totDif=0;
   entries.forEach((e,i) => {
     let dif = e.notaMX - e.deposito;
     totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
     let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
     let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
-    let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
-      <td>${e.tienda}</td>
-      <td>${e.pzas}</td>
-      <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
-      <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
-      <td><span class="badge ${estado}">${estadoL}</span></td>
-      <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
+    let cli = clientMap[e.cliente];
+    htmlCob += `
+      <tr>
+        <td>${i+1}</td>
+        <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
+        <td>${e.tienda}</td>
+        <td>${e.pzas}</td>
+        <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
+        <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
+        <td><span class="badge ${estado}">${estadoL}</span></td>
+        <td><div class="actions-cell">
+          <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        </div></td>
+      </tr>`;
   });
+  tbody.innerHTML = htmlCob;
   document.getElementById('cob_tot_pzas').textContent = totPzas;
   document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
   document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
