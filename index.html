@@ -207,6 +207,12 @@ tbody tr:hover{background:#f8fafc;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* FOCUS VISIBLE */
+:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 2px;
+}
 </style>
 </head>
 <body>
@@ -260,9 +266,9 @@ tbody tr:hover{background:#f8fafc;}
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" title="Editar Tipo de Cambio" aria-label="Editar Tipo de Cambio" role="button" tabindex="0"><span aria-hidden="true">💱</span> TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" title="Editar % Comisión" aria-label="Editar % Comisión" role="button" tabindex="0">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" title="Editar Tax USA" aria-label="Editar Tax USA" role="button" tabindex="0"><span aria-hidden="true">🏷️</span> Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -1333,6 +1339,15 @@ function refreshAll() {
 // ======================== INIT ========================
 function initApp() {
   load();
+
+  // Global keyboard listener for role="button"
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
+
   // Init form defaults
   document.getElementById('f_fecha').value = new Date().toISOString().slice(0,10);
   document.getElementById('d_fecha').value = new Date().toISOString().slice(0,10);
