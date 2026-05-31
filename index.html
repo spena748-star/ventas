@@ -207,6 +207,12 @@ tbody tr:hover{background:#f8fafc;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+/* FOCUS VISIBLE */
+:focus-visible {
+  outline: 2px solid var(--blue-light);
+  outline-offset: 2px;
+}
 </style>
 </head>
 <body>
@@ -235,17 +241,17 @@ tbody tr:hover{background:#f8fafc;}
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" role="button" tabindex="0"><span class="ni">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" role="button" tabindex="0"><span class="ni">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" role="button" tabindex="0"><span class="ni">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" role="button" tabindex="0"><span class="ni">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" role="button" tabindex="0"><span class="ni">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" role="button" tabindex="0"><span class="ni">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" role="button" tabindex="0"><span class="ni">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" role="button" tabindex="0"><span class="ni">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
       <button id="btnSalir">🚪 Cerrar sesión</button>
@@ -256,13 +262,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+          <button class="hamburger" id="hamburger" aria-label="Abrir menú">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+          <span class="badge-tc" id="badgeTC" title="Clic para editar" role="button" tabindex="0">💱 TC: $<span id="tcDisplay">17.40</span></span>
+          <span class="badge-tc" id="badgeCom" title="Clic para editar" role="button" tabindex="0">% Comisión: <span id="comDisplay">10</span>%</span>
+          <span class="badge-tc" id="badgeTax" title="Clic para editar" role="button" tabindex="0">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +812,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar venta" title="Editar venta">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar pago" title="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="Enviar WhatsApp" title="Enviar WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar venta" title="Eliminar venta">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -1351,6 +1357,14 @@ function initApp() {
   // Cross-tab sync
   window.addEventListener('storage', (e)=>{
     if(e.key==='avp_db'||e.key==='avp_nextid') { load(); refreshAll(); }
+  });
+
+  // Global keyboard support for role="button"
+  window.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      e.target.click();
+    }
   });
 }
 
