@@ -773,36 +773,38 @@ function closeModal(id) {
 
 // ======================== RENDER VENTAS ========================
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
-  });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
-    let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
-    let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
+  const filtro = (document.getElementById('filtroVentas')?.value || '').toLowerCase();
+  const filtroSh = document.getElementById('filtroShopperV')?.value || '';
+  const filtroTi = document.getElementById('filtroTiendaV')?.value || '';
+  const tbody = document.getElementById('tbodyVentas');
+
+  // Optimization: Map to include original index to avoid O(N^2) indexOf lookup
+  // and batch DOM updates with innerHTML
+  const html = db.ventas
+    .map((v, idx) => ({ v, idx }))
+    .filter(({ v }) => {
+      const match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
+      const sh = !filtroSh || v.shopper === filtroSh;
+      const ti = !filtroTi || v.tienda === filtroTi;
+      return match && sh && ti;
+    })
+    .map(({ v, idx }) => {
+      const estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
+      const estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
+      return `<tr>
       <td>#${v.id}</td>
       <td>${v.fecha}</td>
       <td>${v.tienda}</td>
       <td>${v.cliente}</td>
       <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
+      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca || ''} ${v.producto} ${v.talla || ''} x${v.pzas}</td>
       <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
+      <td>$${(v.precioU * v.pzas).toFixed(2)}</td>
       <td>$${v.total1.toFixed(2)}</td>
       <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
       <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
+      <td class="${v.dif > 0 ? 'saldo-pend' : (v.dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif < 0 ? ' ✓' : ''}</td>
+      <td>${v.banco || '-'}</td>
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
@@ -811,21 +813,26 @@ function renderVentas() {
           <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
           <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
         </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+      </td></tr>`;
+    })
+    .join('');
+
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
 function renderCobranza() {
-  let filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
-  let filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
+  const filtroCliente = (document.getElementById('filtroCobranza')?.value || '').toLowerCase();
+  const filtroTienda = document.getElementById('filtroTiendaCob')?.value || '';
+
+  // Optimization: Pre-map clients for O(1) lookup
+  const clientMap = new Map(db.clientes.map(c => [c.codigo, c]));
 
   // Group by cliente
-  let map = {};
+  const map = {};
   db.ventas.forEach(v => {
-    if(filtroTienda && v.tienda !== filtroTienda) return;
-    if(!map[v.cliente]) map[v.cliente] = {cliente:v.cliente, tienda:v.tienda, pzas:0, notaMX:0, deposito:0, ventas:[]};
+    if (filtroTienda && v.tienda !== filtroTienda) return;
+    if (!map[v.cliente]) map[v.cliente] = { cliente: v.cliente, tienda: v.tienda, pzas: 0, notaMX: 0, deposito: 0, ventas: [] };
     map[v.cliente].pzas += v.pzas;
     map[v.cliente].notaMX += v.notaMX;
     map[v.cliente].deposito += v.deposito;
@@ -833,57 +840,62 @@ function renderCobranza() {
   });
   // Add dep independientes
   db.depIndep.forEach(d => {
-    if(filtroTienda && d.tienda !== filtroTienda) return;
-    if(map[d.cliente]) { map[d.cliente].deposito += d.monto; }
+    if (filtroTienda && d.tienda !== filtroTienda) return;
+    if (map[d.cliente]) { map[d.cliente].deposito += d.monto; }
   });
 
-  let entries = Object.values(map).filter(e => !filtroCliente || e.cliente.includes(filtroCliente));
-  entries.sort((a,b) => a.cliente.localeCompare(b.cliente));
+  const entries = Object.values(map).filter(e => !filtroCliente || e.cliente.includes(filtroCliente));
+  entries.sort((a, b) => a.cliente.localeCompare(b.cliente));
 
   // Bank totals
-  let bancos = {};
-  db.ventas.forEach(v => { if(v.banco && v.deposito>0) { bancos[v.banco] = (bancos[v.banco]||0)+v.deposito; } });
-  db.depIndep.forEach(d => { if(d.banco) { bancos[d.banco] = (bancos[d.banco]||0)+d.monto; } });
-  let bancosEl = document.getElementById('bancosSummary');
-  bancosEl.innerHTML = Object.entries(bancos).map(([b,m])=>`
+  const bancos = {};
+  db.ventas.forEach(v => { if (v.banco && v.deposito > 0) { bancos[v.banco] = (bancos[v.banco] || 0) + v.deposito; } });
+  db.depIndep.forEach(d => { if (d.banco) { bancos[d.banco] = (bancos[d.banco] || 0) + d.monto; } });
+  const bancosEl = document.getElementById('bancosSummary');
+  bancosEl.innerHTML = Object.entries(bancos).map(([b, m]) => `
     <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
       <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
       <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
     </div>`).join('') + (() => {
-    let total = Object.values(bancos).reduce((s,v)=>s+v,0);
-    return `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${total.toFixed(2)}</div></div>`;
-  })();
+      const total = Object.values(bancos).reduce((s, v) => s + v, 0);
+      return `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${total.toFixed(2)}</div></div>`;
+    })();
 
   // Table
-  let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
-  let totPzas=0, totMXN=0, totDep=0, totDif=0;
-  entries.forEach((e,i) => {
-    let dif = e.notaMX - e.deposito;
-    totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
-    let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
-    let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
-    let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
+  const tbody = document.getElementById('tbodyCobranza');
+  let totPzas = 0, totMXN = 0, totDep = 0, totDif = 0;
+
+  // Optimization: Batch innerHTML update
+  const html = entries.map((e, i) => {
+    const dif = e.notaMX - e.deposito;
+    totPzas += e.pzas; totMXN += e.notaMX; totDep += e.deposito; totDif += dif;
+    const estado = dif <= 0 ? 'pagado' : (e.deposito > 0 ? 'parcial' : 'pendiente');
+    const estadoL = dif <= 0 ? 'Pagado' : (e.deposito > 0 ? 'Parcial' : 'Pendiente');
+
+    // O(1) lookup
+    const cli = clientMap.get(e.cliente);
+
+    return `<tr>
+      <td>${i + 1}</td>
+      <td><strong>${e.cliente}</strong>${cli && cli.nombre ? `<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>` : ''}</td>
       <td>${e.tienda}</td>
       <td>${e.pzas}</td>
       <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
       <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
-      <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
+      <td class="${dif > 0 ? 'saldo-pend' : (dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif < 0 ? ' (a favor)' : ''}</td>
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
         <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
-  });
+      </div></td></tr>`;
+  }).join('');
+
+  tbody.innerHTML = html;
+
   document.getElementById('cob_tot_pzas').textContent = totPzas;
-  document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
-  document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
-  let difEl = document.getElementById('cob_tot_dif');
-  difEl.textContent = '$'+Math.abs(totDif).toFixed(2)+(totDif<0?' (a favor)':'');
+  document.getElementById('cob_tot_mxn').textContent = '$' + totMXN.toFixed(2);
+  document.getElementById('cob_tot_dep').textContent = '$' + totDep.toFixed(2);
+  const difEl = document.getElementById('cob_tot_dif');
+  difEl.textContent = '$' + Math.abs(totDif).toFixed(2) + (totDif < 0 ? ' (a favor)' : '');
   difEl.style.color = totDif > 0 ? 'var(--red)' : 'var(--green)';
 }
 
