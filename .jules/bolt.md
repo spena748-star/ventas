@@ -1,0 +1,3 @@
+## 2026-06-03 - Avoiding O(N^2) lookups in render loops
+**Learning:** In vanilla JS applications with large datasets, using `Array.prototype.indexOf(item)` or `Array.prototype.find()` inside a loop over filtered results creates an $O(N \cdot M)$ bottleneck. Pre-mapping indices with `.map((v, i) => ({v, i}))` or using a Map for lookups reduces this to $O(N)$. Additionally, `tbody.innerHTML` batch updates are significantly faster than individual `appendChild` calls for 1000+ rows.
+**Action:** Always pre-calculate indices or lookup maps before entering render loops. Batch DOM updates by building a single HTML string.
