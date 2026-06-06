@@ -1,0 +1,3 @@
+## 2026-06-06 - Focus Visibility and Icon-Only Button Accessibility
+**Learning:** In applications where `outline: none` is widely used for a "clean" look, keyboard accessibility is severely compromised. Using `:focus-visible` with `!important` and an `outline-offset` provides a high-contrast indicator that respects the original design for mouse users while fulfilling accessibility requirements.
+**Action:** Always check for `outline: none` or missing focus states and implement a global `:focus-visible` ring. Ensure icon-only buttons have both `aria-label` and `title` for screen readers and hover context.
