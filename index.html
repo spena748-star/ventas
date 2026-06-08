@@ -28,6 +28,23 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+:focus-visible {
+  outline: 2px solid var(--blue-light) !important;
+  outline-offset: 2px;
+}
+
 /* LOGIN */
 .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy) 0%,#1e3a6e 50%,var(--teal) 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
 .login-card{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.15);border-radius:28px;padding:40px 36px;width:90%;max-width:380px;text-align:center;}
@@ -217,6 +234,7 @@ tbody tr:hover{background:#f8fafc;}
     <div class="login-logo">🛍️</div>
     <h1>Admin Ventas Pro</h1>
     <p>Sistema de control de compras y cobranza</p>
+    <label class="sr-only" for="loginPass">Contraseña</label>
     <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" autocomplete="off">
     <button class="login-btn" id="btnLogin">Entrar al sistema</button>
     <div class="login-err" id="loginErr"></div>
@@ -256,13 +274,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Menú principal">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" title="Clic para editar" role="button" tabindex="0">💱 TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" title="Clic para editar" role="button" tabindex="0">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" title="Clic para editar" role="button" tabindex="0">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +824,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar" title="Editar">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar Pago" title="Registrar Pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="WhatsApp" title="WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar" title="Eliminar">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -875,7 +893,7 @@ function renderCobranza() {
       <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        <button class="btn primary xs" onclick="openWA('${e.cliente}')" aria-label="WhatsApp" title="WhatsApp">📲</button>
       </div></td>`;
     tbody.appendChild(tr);
   });
@@ -1144,7 +1162,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" aria-label="Eliminar" title="Eliminar">×</button>`;
     el.appendChild(c);
   });
 }
@@ -1370,6 +1388,10 @@ document.getElementById('sidebarOverlay').onclick = ()=>{ document.getElementByI
 document.getElementById('badgeTC').onclick = ()=>{ let n=prompt('Nuevo tipo de cambio:',db.tc); if(n&&!isNaN(+n)){db.tc=+n;save();document.getElementById('tcDisplay').textContent=(+n).toFixed(2);document.getElementById('f_tc').value=+n;updatePreview();}};
 document.getElementById('badgeCom').onclick = ()=>{ let n=prompt('Nueva comisión %:',db.comision); if(n&&!isNaN(+n)){db.comision=+n;save();document.getElementById('comDisplay').textContent=+n;updatePreview();}};
 document.getElementById('badgeTax').onclick = ()=>{ let n=prompt('Tax USA % (ej. 8.25 para Texas):',db.taxUSA); if(n&&!isNaN(+n)){db.taxUSA=+n;save();document.getElementById('taxDisplay').textContent=+n;document.getElementById('f_tax').value=+n;updatePreview();}};
+
+document.querySelectorAll('.badge-tc').forEach(b => {
+  b.addEventListener('keydown', e => { if(e.key==='Enter' || e.key===' ') { e.preventDefault(); b.click(); } });
+});
 
 document.getElementById('btnIniciarHH').onclick = hhStart;
 document.getElementById('btnPausarHH').onclick = hhPause;
