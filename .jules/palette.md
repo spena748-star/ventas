@@ -1,0 +1,3 @@
+## 2026-06-08 - Enhancing Accessibility in Single-File Legacy Apps
+**Learning:** In applications where `outline: none` or `outline: 0` is used extensively for aesthetic reasons, a global `:focus-visible` rule with `!important` is essential to restore accessibility for keyboard users without regressing the mouse-user experience. Additionally, interactive elements implemented as non-semantic tags (like `<span>` badges) require `role="button"`, `tabindex="0"`, and explicit keyboard event listeners (Enter/Space) to be fully inclusive.
+**Action:** Always audit for `outline: none` and provide a high-contrast `:focus-visible` fallback. Ensure all clickable `<span>` or `<div>` elements have appropriate ARIA roles and keyboard support.
