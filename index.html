@@ -773,112 +773,147 @@ function closeModal(id) {
 
 // ======================== RENDER VENTAS ========================
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
+  const filtro = (document.getElementById('filtroVentas')?.value || '').toLowerCase();
+  const filtroSh = document.getElementById('filtroShopperV')?.value || '';
+  const filtroTi = document.getElementById('filtroTiendaV')?.value || '';
+  const tbody = document.getElementById('tbodyVentas');
+  if (!tbody) return;
+
+  let html = '';
+  // Single pass optimization: handle filtering, index tracking, and HTML generation in one loop
+  db.ventas.forEach((v, idx) => {
+    // Filter logic
+    if (filtro && !`${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro)) return;
+    if (filtroSh && v.shopper !== filtroSh) return;
+    if (filtroTi && v.tienda !== filtroTi) return;
+
+    const estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
+    const estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
+
+    html += `
+      <tr>
+        <td>#${v.id}</td>
+        <td>${v.fecha}</td>
+        <td>${v.tienda}</td>
+        <td>${v.cliente}</td>
+        <td>${v.shopper}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
+        <td>${v.pzas}</td>
+        <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
+        <td>$${v.total1.toFixed(2)}</td>
+        <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
+        <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
+        <td>${v.banco||'-'}</td>
+        <td><span class="badge ${estado}">${estadoLabel}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
+            <button class="btn success xs" onclick="openPago(${idx})">💵</button>
+            <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
+            <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
   });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
-    let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
-    let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>#${v.id}</td>
-      <td>${v.fecha}</td>
-      <td>${v.tienda}</td>
-      <td>${v.cliente}</td>
-      <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
-      <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
-      <td>$${v.total1.toFixed(2)}</td>
-      <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
-      <td><span class="badge ${estado}">${estadoLabel}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+  // Batch DOM update
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
 function renderCobranza() {
-  let filtroCliente = (document.getElementById('filtroCobranza')?.value||'').toLowerCase();
-  let filtroTienda = document.getElementById('filtroTiendaCob')?.value||'';
+  const filtroCliente = (document.getElementById('filtroCobranza')?.value || '').toLowerCase();
+  const filtroTienda = document.getElementById('filtroTiendaCob')?.value || '';
 
-  // Group by cliente
-  let map = {};
+  const clientGroups = {};
+  const bancos = {};
+
+  // Group by client and calculate bank totals in one pass
   db.ventas.forEach(v => {
-    if(filtroTienda && v.tienda !== filtroTienda) return;
-    if(!map[v.cliente]) map[v.cliente] = {cliente:v.cliente, tienda:v.tienda, pzas:0, notaMX:0, deposito:0, ventas:[]};
-    map[v.cliente].pzas += v.pzas;
-    map[v.cliente].notaMX += v.notaMX;
-    map[v.cliente].deposito += v.deposito;
-    map[v.cliente].ventas.push(v);
+    // Bank totals (always calculate regardless of tienda filter for correctness of bank status?
+    // Actually the original code filtered bank totals too if it was in the loop...
+    // wait, the original code had a separate loop for bank totals that did NOT filter by tienda.
+    // Let's check original bank totals loop:
+    // db.ventas.forEach(v => { if(v.banco && v.deposito>0) { bancos[v.banco] = (bancos[v.banco]||0)+v.deposito; } });
+    // Correct, it was NOT filtered by tienda.
+    if (v.banco && v.deposito > 0) {
+      bancos[v.banco] = (bancos[v.banco] || 0) + v.deposito;
+    }
+
+    if (filtroTienda && v.tienda !== filtroTienda) return;
+    if (!clientGroups[v.cliente]) {
+      clientGroups[v.cliente] = { cliente: v.cliente, tienda: v.tienda, pzas: 0, notaMX: 0, deposito: 0 };
+    }
+    clientGroups[v.cliente].pzas += v.pzas;
+    clientGroups[v.cliente].notaMX += v.notaMX;
+    clientGroups[v.cliente].deposito += v.deposito;
   });
+
   // Add dep independientes
   db.depIndep.forEach(d => {
-    if(filtroTienda && d.tienda !== filtroTienda) return;
-    if(map[d.cliente]) { map[d.cliente].deposito += d.monto; }
+    if (d.banco) {
+      bancos[d.banco] = (bancos[d.banco] || 0) + d.monto;
+    }
+
+    if (filtroTienda && d.tienda !== filtroTienda) return;
+    if (clientGroups[d.cliente]) {
+      clientGroups[d.cliente].deposito += d.monto;
+    }
   });
 
-  let entries = Object.values(map).filter(e => !filtroCliente || e.cliente.includes(filtroCliente));
-  entries.sort((a,b) => a.cliente.localeCompare(b.cliente));
+  const entries = Object.values(clientGroups).filter(e => !filtroCliente || e.cliente.toLowerCase().includes(filtroCliente));
+  entries.sort((a, b) => a.cliente.localeCompare(b.cliente));
 
-  // Bank totals
-  let bancos = {};
-  db.ventas.forEach(v => { if(v.banco && v.deposito>0) { bancos[v.banco] = (bancos[v.banco]||0)+v.deposito; } });
-  db.depIndep.forEach(d => { if(d.banco) { bancos[d.banco] = (bancos[d.banco]||0)+d.monto; } });
-  let bancosEl = document.getElementById('bancosSummary');
-  bancosEl.innerHTML = Object.entries(bancos).map(([b,m])=>`
-    <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
-      <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
-      <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
-    </div>`).join('') + (() => {
-    let total = Object.values(bancos).reduce((s,v)=>s+v,0);
-    return `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${total.toFixed(2)}</div></div>`;
-  })();
+  // Render Bank Summary
+  const bancosEl = document.getElementById('bancosSummary');
+  if (bancosEl) {
+    let totalBancos = 0;
+    let bancosHtml = Object.entries(bancos).map(([b, m]) => {
+      totalBancos += m;
+      return `
+        <div style="background:var(--bg);border:1px solid var(--border);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);">${b}</div>
+          <div style="font-size:18px;font-weight:800;color:var(--navy);">$${m.toFixed(2)}</div>
+        </div>`;
+    }).join('');
+
+    bancosHtml += `<div style="background:var(--navy);border-radius:12px;padding:10px 16px;display:flex;flex-direction:column;gap:2px;"><div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.5);">TOTAL DEPÓSITOS</div><div style="font-size:18px;font-weight:800;color:var(--teal-light);">$${totalBancos.toFixed(2)}</div></div>`;
+    bancosEl.innerHTML = bancosHtml;
+  }
+
+  // Optimize client lookup: O(1) instead of O(N) in the loop
+  const clientMap = {};
+  db.clientes.forEach(c => { clientMap[c.codigo] = c; });
 
   // Table
-  let tbody = document.getElementById('tbodyCobranza');
-  tbody.innerHTML = '';
-  let totPzas=0, totMXN=0, totDep=0, totDif=0;
-  entries.forEach((e,i) => {
-    let dif = e.notaMX - e.deposito;
-    totPzas+=e.pzas; totMXN+=e.notaMX; totDep+=e.deposito; totDif+=dif;
-    let estado = dif <= 0 ? 'pagado' : (e.deposito>0?'parcial':'pendiente');
-    let estadoL = dif <= 0 ? 'Pagado' : (e.deposito>0?'Parcial':'Pendiente');
-    let cli = db.clientes.find(c=>c.codigo===e.cliente);
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${i+1}</td>
-      <td><strong>${e.cliente}</strong>${cli&&cli.nombre?`<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>`:''}</td>
-      <td>${e.tienda}</td>
-      <td>${e.pzas}</td>
-      <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
-      <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
-      <td><span class="badge ${estado}">${estadoL}</span></td>
-      <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
-      </div></td>`;
-    tbody.appendChild(tr);
+  const tbody = document.getElementById('tbodyCobranza');
+  if (!tbody) return;
+
+  let totPzas = 0, totMXN = 0, totDep = 0, totDif = 0;
+  let tableHtml = '';
+  entries.forEach((e, i) => {
+    const dif = e.notaMX - e.deposito;
+    totPzas += e.pzas; totMXN += e.notaMX; totDep += e.deposito; totDif += dif;
+    const estado = dif <= 0 ? 'pagado' : (e.deposito > 0 ? 'parcial' : 'pendiente');
+    const estadoL = dif <= 0 ? 'Pagado' : (e.deposito > 0 ? 'Parcial' : 'Pendiente');
+    const cli = clientMap[e.cliente];
+
+    tableHtml += `
+      <tr>
+        <td>${i + 1}</td>
+        <td><strong>${e.cliente}</strong>${cli && cli.nombre ? `<br><span style="font-size:11px;color:var(--text3);">${cli.nombre}</span>` : ''}</td>
+        <td>${e.tienda}</td>
+        <td>${e.pzas}</td>
+        <td style="font-weight:700;">$${e.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);font-weight:600;">$${e.deposito.toFixed(2)}</td>
+        <td class="${dif > 0 ? 'saldo-pend' : (dif < 0 ? 'saldo-over' : 'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif < 0 ? ' (a favor)' : ''}</td>
+        <td><span class="badge ${estado}">${estadoL}</span></td>
+        <td><div class="actions-cell">
+          <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        </div></td>
+      </tr>`;
   });
+  tbody.innerHTML = tableHtml;
   document.getElementById('cob_tot_pzas').textContent = totPzas;
   document.getElementById('cob_tot_mxn').textContent = '$'+totMXN.toFixed(2);
   document.getElementById('cob_tot_dep').textContent = '$'+totDep.toFixed(2);
@@ -889,30 +924,40 @@ function renderCobranza() {
 
 // ======================== DASHBOARD ========================
 function renderDashboard() {
-  let arts = db.ventas.reduce((s,v)=>s+v.pzas,0);
-  let usd = db.ventas.reduce((s,v)=>s+v.precioU*v.pzas,0);
-  let total1 = db.ventas.reduce((s,v)=>s+v.total1,0);
-  let notaMX = db.ventas.reduce((s,v)=>s+v.notaMX,0);
-  let dep = db.ventas.reduce((s,v)=>s+v.deposito,0);
-  let depIndep = db.depIndep.reduce((s,d)=>s+d.monto,0);
-  let saldo = notaMX - dep - depIndep;
-  let comTotal = db.ventas.reduce((s,v)=>s+(v.precioU*v.pzas*db.comision/100*v.tc),0);
-  let clientesUnicos = new Set(db.ventas.map(v=>v.cliente)).size;
+  const today = new Date().toISOString().slice(0, 10);
+  let arts = 0, usd = 0, total1 = 0, notaMX = 0, dep = 0, comTotal = 0, ventasHoy = 0;
+  const uniqueClients = new Set();
 
-  let sg = document.getElementById('statsGrid');
-  sg.innerHTML = `
-    <div class="stat blue"><div class="stat-icon">📦</div><div class="stat-label">Artículos</div><div class="stat-value">${arts}</div><div class="stat-sub">${clientesUnicos} clientes</div></div>
-    <div class="stat teal"><div class="stat-icon">💵</div><div class="stat-label">Total USD</div><div class="stat-value">$${usd.toFixed(0)}</div><div class="stat-sub">Sin tax de tienda</div></div>
-    <div class="stat blue"><div class="stat-icon">🏬</div><div class="stat-label">Costo Tienda MXN</div><div class="stat-value">$${total1.toFixed(0)}</div><div class="stat-sub">Total 1 (c/tax)</div></div>
-    <div class="stat green"><div class="stat-icon">💰</div><div class="stat-label">Nota MX Clientes</div><div class="stat-value">$${notaMX.toFixed(0)}</div><div class="stat-sub">Lo que cobras</div></div>
-    <div class="stat teal"><div class="stat-icon">🏦</div><div class="stat-label">Depósitos</div><div class="stat-value">$${(dep+depIndep).toFixed(0)}</div><div class="stat-sub">${dep>0?'+ $'+depIndep.toFixed(0)+' indep.':''}</div></div>
-    <div class="stat ${saldo>0?'red':'green'}"><div class="stat-icon">⚠️</div><div class="stat-label">Saldo Pendiente</div><div class="stat-value">$${Math.abs(saldo).toFixed(0)}</div><div class="stat-sub">${saldo<0?'✓ Saldo a favor':'Por cobrar'}</div></div>
-    <div class="stat amber"><div class="stat-icon">🏷️</div><div class="stat-label">Comisión Shopper</div><div class="stat-value">$${comTotal.toFixed(0)}</div><div class="stat-sub">MXN (${db.comision}%)</div></div>`;
+  // Single pass optimization for all dashboard metrics
+  db.ventas.forEach(v => {
+    arts += v.pzas;
+    usd += v.precioU * v.pzas;
+    total1 += v.total1;
+    notaMX += v.notaMX;
+    dep += v.deposito;
+    comTotal += (v.precioU * v.pzas * db.comision / 100 * v.tc);
+    uniqueClients.add(v.cliente);
+    if (v.fecha === today) ventasHoy++;
+  });
+
+  const depIndep = db.depIndep.reduce((s, d) => s + d.monto, 0);
+  const saldo = notaMX - dep - depIndep;
+  const clientesUnicos = uniqueClients.size;
+
+  const sg = document.getElementById('statsGrid');
+  if (sg) {
+    sg.innerHTML = `
+      <div class="stat blue"><div class="stat-icon">📦</div><div class="stat-label">Artículos</div><div class="stat-value">${arts}</div><div class="stat-sub">${clientesUnicos} clientes</div></div>
+      <div class="stat teal"><div class="stat-icon">💵</div><div class="stat-label">Total USD</div><div class="stat-value">$${usd.toFixed(0)}</div><div class="stat-sub">Sin tax de tienda</div></div>
+      <div class="stat blue"><div class="stat-icon">🏬</div><div class="stat-label">Costo Tienda MXN</div><div class="stat-value">$${total1.toFixed(0)}</div><div class="stat-sub">Total 1 (c/tax)</div></div>
+      <div class="stat green"><div class="stat-icon">💰</div><div class="stat-label">Nota MX Clientes</div><div class="stat-value">$${notaMX.toFixed(0)}</div><div class="stat-sub">Lo que cobras</div></div>
+      <div class="stat teal"><div class="stat-icon">🏦</div><div class="stat-label">Depósitos</div><div class="stat-value">$${(dep + depIndep).toFixed(0)}</div><div class="stat-sub">${dep > 0 ? '+ $' + depIndep.toFixed(0) + ' indep.' : ''}</div></div>
+      <div class="stat ${saldo > 0 ? 'red' : 'green'}"><div class="stat-icon">⚠️</div><div class="stat-label">Saldo Pendiente</div><div class="stat-value">$${Math.abs(saldo).toFixed(0)}</div><div class="stat-sub">${saldo < 0 ? '✓ Saldo a favor' : 'Por cobrar'}</div></div>
+      <div class="stat amber"><div class="stat-icon">🏷️</div><div class="stat-label">Comisión Shopper</div><div class="stat-value">$${comTotal.toFixed(0)}</div><div class="stat-sub">MXN (${db.comision}%)</div></div>`;
+  }
 
   // Semana resumen
-  let sem = document.getElementById('semanaResumen');
-  let today = new Date().toISOString().slice(0,10);
-  let ventasHoy = db.ventas.filter(v=>v.fecha===today).length;
+  const sem = document.getElementById('semanaResumen');
   let utilidad = notaMX - total1 - comTotal;
   sem.innerHTML = `
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
