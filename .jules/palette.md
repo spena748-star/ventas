@@ -1,0 +1,3 @@
+## 2026-06-11 - Enhancing Keyboard Accessibility for Non-Semantic Elements
+**Learning:** In vanilla JS applications, interactive non-semantic elements (like `<span>` used as badges) must be explicitly given `role="button"` and `tabindex="0"` to be discoverable by keyboard users. Furthermore, a global or per-element keyboard listener for 'Enter' and 'Space' is required since these elements do not natively trigger 'click' events on key presses.
+**Action:** Always implement `role="button"`, `tabindex="0"`, and a corresponding keyboard event listener when making non-button elements interactive. Use `:focus-visible` with high specificity to ensure the focus indicator is never lost.
