@@ -26,6 +26,7 @@
   --header-h: 60px;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
 /* LOGIN */
@@ -217,6 +218,7 @@ tbody tr:hover{background:#f8fafc;}
     <div class="login-logo">🛍️</div>
     <h1>Admin Ventas Pro</h1>
     <p>Sistema de control de compras y cobranza</p>
+    <label for="loginPass" class="sr-only">Contraseña</label>
     <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" autocomplete="off">
     <button class="login-btn" id="btnLogin">Entrar al sistema</button>
     <div class="login-err" id="loginErr"></div>
@@ -256,7 +258,7 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Menú principal">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
@@ -313,19 +315,19 @@ tbody tr:hover{background:#f8fafc;}
             </div>
           </div>
           <div class="form-grid">
-            <div class="fg"><label>📅 Fecha</label><input type="date" id="f_fecha"></div>
-            <div class="fg"><label>🏬 Tienda</label><select id="f_tienda"></select></div>
-            <div class="fg"><label>👤 Comprador</label><select id="f_shopper"></select></div>
-            <div class="fg"><label>📱 Cliente (4 dig)</label><input type="text" id="f_cliente" maxlength="4" placeholder="Ej: 2146"></div>
-            <div class="fg"><label>🔢 PZAS</label><input type="number" id="f_pzas" value="1" min="1"></div>
-            <div class="fg"><label>🏷️ Marca</label><select id="f_marca"></select></div>
-            <div class="fg"><label>📦 Producto</label><input type="text" id="f_producto"></div>
-            <div class="fg"><label>📏 Talla</label><input type="text" id="f_talla"></div>
-            <div class="fg"><label>💵 Precio USD (sin tax)</label><input type="number" id="f_precioUSD" step="0.01" placeholder="0.00"></div>
-            <div class="fg"><label>🧾 Tax USA %</label><input type="number" id="f_tax" step="0.01" placeholder="8.25"></div>
-            <div class="fg"><label>💱 Tipo de Cambio</label><input type="number" id="f_tc" step="0.01"></div>
-            <div class="fg"><label>💰 Depósito MXN</label><input type="number" id="f_deposito" value="0" step="0.01"></div>
-            <div class="fg"><label>🏦 Banco</label><select id="f_banco"><option value="">Sin banco</option><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
+            <div class="fg"><label for="f_fecha">📅 Fecha</label><input type="date" id="f_fecha"></div>
+            <div class="fg"><label for="f_tienda">🏬 Tienda</label><select id="f_tienda"></select></div>
+            <div class="fg"><label for="f_shopper">👤 Comprador</label><select id="f_shopper"></select></div>
+            <div class="fg"><label for="f_cliente">📱 Cliente (4 dig)</label><input type="text" id="f_cliente" maxlength="4" placeholder="Ej: 2146"></div>
+            <div class="fg"><label for="f_pzas">🔢 PZAS</label><input type="number" id="f_pzas" value="1" min="1"></div>
+            <div class="fg"><label for="f_marca">🏷️ Marca</label><select id="f_marca"></select></div>
+            <div class="fg"><label for="f_producto">📦 Producto</label><input type="text" id="f_producto"></div>
+            <div class="fg"><label for="f_talla">📏 Talla</label><input type="text" id="f_talla"></div>
+            <div class="fg"><label for="f_precioUSD">💵 Precio USD (sin tax)</label><input type="number" id="f_precioUSD" step="0.01" placeholder="0.00"></div>
+            <div class="fg"><label for="f_tax">🧾 Tax USA %</label><input type="number" id="f_tax" step="0.01" placeholder="8.25"></div>
+            <div class="fg"><label for="f_tc">💱 Tipo de Cambio</label><input type="number" id="f_tc" step="0.01"></div>
+            <div class="fg"><label for="f_deposito">💰 Depósito MXN</label><input type="number" id="f_deposito" value="0" step="0.01"></div>
+            <div class="fg"><label for="f_banco">🏦 Banco</label><select id="f_banco"><option value="">Sin banco</option><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
           </div>
           <!-- PRICE PREVIEW -->
           <div class="price-preview">
@@ -428,12 +430,12 @@ tbody tr:hover{background:#f8fafc;}
         <div class="card">
           <div class="card-header"><div class="card-title">🏦 Depósito sin venta</div></div>
           <div class="form-grid">
-            <div class="fg"><label>Fecha</label><input type="date" id="d_fecha"></div>
-            <div class="fg"><label>Tienda</label><select id="d_tienda"></select></div>
-            <div class="fg"><label>Cliente</label><input type="text" id="d_cliente" maxlength="4"></div>
-            <div class="fg"><label>Shopper</label><select id="d_shopper"></select></div>
-            <div class="fg"><label>Monto MXN</label><input type="number" id="d_monto" step="0.01"></div>
-            <div class="fg"><label>Banco</label><select id="d_banco"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
+            <div class="fg"><label for="d_fecha">Fecha</label><input type="date" id="d_fecha"></div>
+            <div class="fg"><label for="d_tienda">Tienda</label><select id="d_tienda"></select></div>
+            <div class="fg"><label for="d_cliente">Cliente</label><input type="text" id="d_cliente" maxlength="4"></div>
+            <div class="fg"><label for="d_shopper">Shopper</label><select id="d_shopper"></select></div>
+            <div class="fg"><label for="d_monto">Monto MXN</label><input type="number" id="d_monto" step="0.01"></div>
+            <div class="fg"><label for="d_banco">Banco</label><select id="d_banco"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
           </div>
           <button class="btn primary" id="btnRegistrarDep">Registrar depósito</button>
           <div class="tbl-wrap" style="margin-top:18px;">
@@ -485,9 +487,9 @@ tbody tr:hover{background:#f8fafc;}
           <div class="card">
             <div class="card-header"><div class="card-title">👥 Clientes</div></div>
             <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
-              <div class="fg"><label>Código (4 dig)</label><input type="text" id="cl_codigo" maxlength="4" placeholder="2146"></div>
-              <div class="fg"><label>Nombre</label><input type="text" id="cl_nombre" placeholder="Nombre cliente"></div>
-              <div class="fg"><label>WhatsApp</label><input type="text" id="cl_wa" placeholder="521234567890"></div>
+              <div class="fg"><label for="cl_codigo">Código (4 dig)</label><input type="text" id="cl_codigo" maxlength="4" placeholder="2146"></div>
+              <div class="fg"><label for="cl_nombre">Nombre</label><input type="text" id="cl_nombre" placeholder="Nombre cliente"></div>
+              <div class="fg"><label for="cl_wa">WhatsApp</label><input type="text" id="cl_wa" placeholder="521234567890"></div>
             </div>
             <button class="btn primary sm" id="btnAddCliente">💾 Guardar cliente</button>
             <div class="tbl-wrap" style="margin-top:14px;">
@@ -683,19 +685,19 @@ function openEdit(idx) {
   let v = db.ventas[idx];
   document.getElementById('editFormContainer').innerHTML = `
     <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-      <div class="fg"><label>Fecha</label><input type="date" id="e_fecha" value="${v.fecha}"></div>
-      <div class="fg"><label>Tienda</label><select id="e_tienda">${db.tiendas.map(t=>`<option ${t===v.tienda?'selected':''}>${t}</option>`).join('')}</select></div>
-      <div class="fg"><label>Shopper</label><select id="e_shopper">${db.shoppers.map(s=>`<option ${s===v.shopper?'selected':''}>${s}</option>`).join('')}</select></div>
-      <div class="fg"><label>Cliente</label><input type="text" id="e_cliente" value="${v.cliente}" maxlength="4"></div>
-      <div class="fg"><label>PZAS</label><input type="number" id="e_pzas" value="${v.pzas}" min="1"></div>
-      <div class="fg"><label>Marca</label><input type="text" id="e_marca" value="${v.marca||''}"></div>
-      <div class="fg"><label>Producto</label><input type="text" id="e_producto" value="${v.producto}"></div>
-      <div class="fg"><label>Talla</label><input type="text" id="e_talla" value="${v.talla||''}"></div>
-      <div class="fg"><label>Precio USD</label><input type="number" id="e_precioU" step="0.01" value="${v.precioU}"></div>
-      <div class="fg"><label>Tax %</label><input type="number" id="e_tax" step="0.01" value="${v.tax||db.taxUSA}"></div>
-      <div class="fg"><label>TC</label><input type="number" id="e_tc" step="0.01" value="${v.tc}"></div>
-      <div class="fg"><label>Depósito</label><input type="number" id="e_dep" step="0.01" value="${v.deposito}"></div>
-      <div class="fg"><label>Banco</label><input type="text" id="e_banco" value="${v.banco||''}"></div>
+      <div class="fg"><label for="e_fecha">Fecha</label><input type="date" id="e_fecha" value="${v.fecha}"></div>
+      <div class="fg"><label for="e_tienda">Tienda</label><select id="e_tienda">${db.tiendas.map(t=>`<option ${t===v.tienda?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fg"><label for="e_shopper">Shopper</label><select id="e_shopper">${db.shoppers.map(s=>`<option ${s===v.shopper?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="fg"><label for="e_cliente">Cliente</label><input type="text" id="e_cliente" value="${v.cliente}" maxlength="4"></div>
+      <div class="fg"><label for="e_pzas">PZAS</label><input type="number" id="e_pzas" value="${v.pzas}" min="1"></div>
+      <div class="fg"><label for="e_marca">Marca</label><input type="text" id="e_marca" value="${v.marca||''}"></div>
+      <div class="fg"><label for="e_producto">Producto</label><input type="text" id="e_producto" value="${v.producto}"></div>
+      <div class="fg"><label for="e_talla">Talla</label><input type="text" id="e_talla" value="${v.talla||''}"></div>
+      <div class="fg"><label for="e_precioU">Precio USD</label><input type="number" id="e_precioU" step="0.01" value="${v.precioU}"></div>
+      <div class="fg"><label for="e_tax">Tax %</label><input type="number" id="e_tax" step="0.01" value="${v.tax||db.taxUSA}"></div>
+      <div class="fg"><label for="e_tc">TC</label><input type="number" id="e_tc" step="0.01" value="${v.tc}"></div>
+      <div class="fg"><label for="e_dep">Depósito</label><input type="number" id="e_dep" step="0.01" value="${v.deposito}"></div>
+      <div class="fg"><label for="e_banco">Banco</label><input type="text" id="e_banco" value="${v.banco||''}"></div>
     </div>`;
   document.getElementById('modalEditar').classList.add('open');
 }
@@ -806,10 +808,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar" title="Editar">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar Pago" title="Registrar Pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="WhatsApp" title="WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar" title="Eliminar">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -1144,7 +1146,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" aria-label="Eliminar" title="Eliminar">×</button>`;
     el.appendChild(c);
   });
 }
