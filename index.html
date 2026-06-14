@@ -777,43 +777,46 @@ function renderVentas() {
   let filtroSh = document.getElementById('filtroShopperV')?.value||'';
   let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
   let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
+  if(!tbody) return;
+
+  // ⚡ Optimization: Single pass, avoid O(N) indexOf in loop, batch DOM updates
+  let html = '';
+  for (let i = 0; i < db.ventas.length; i++) {
+    let v = db.ventas[i];
     let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
     let sh = !filtroSh || v.shopper === filtroSh;
     let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
-  });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
-    let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
-    let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>#${v.id}</td>
-      <td>${v.fecha}</td>
-      <td>${v.tienda}</td>
-      <td>${v.cliente}</td>
-      <td>${v.shopper}</td>
-      <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
-      <td>${v.pzas}</td>
-      <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
-      <td>$${v.total1.toFixed(2)}</td>
-      <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
-      <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
-      <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
-      <td>${v.banco||'-'}</td>
-      <td><span class="badge ${estado}">${estadoLabel}</span></td>
-      <td>
-        <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
-        </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+
+    if (match && sh && ti) {
+      let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
+      let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
+      html += `<tr>
+        <td>#${v.id}</td>
+        <td>${v.fecha}</td>
+        <td>${v.tienda}</td>
+        <td>${v.cliente}</td>
+        <td>${v.shopper}</td>
+        <td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${v.marca||''} ${v.producto} ${v.talla||''} x${v.pzas}</td>
+        <td>${v.pzas}</td>
+        <td>$${(v.precioU*v.pzas).toFixed(2)}</td>
+        <td>$${v.total1.toFixed(2)}</td>
+        <td style="font-weight:700;">$${v.notaMX.toFixed(2)}</td>
+        <td style="color:var(--green);">$${v.deposito.toFixed(2)}</td>
+        <td class="${v.dif>0?'saldo-pend':(v.dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(v.dif).toFixed(2)}${v.dif<0?' ✓':''}</td>
+        <td>${v.banco||'-'}</td>
+        <td><span class="badge ${estado}">${estadoLabel}</span></td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn outline xs" onclick="openEdit(${i})" aria-label="Editar" title="Editar">✏️</button>
+            <button class="btn success xs" onclick="openPago(${i})" aria-label="Registrar Pago" title="Registrar Pago">💵</button>
+            <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="WhatsApp" title="WhatsApp">📲</button>
+            <button class="btn danger xs" onclick="deleteVenta(${i})" aria-label="Eliminar" title="Eliminar">🗑️</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+  }
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
