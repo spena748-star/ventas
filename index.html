@@ -256,7 +256,7 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Menú principal">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
@@ -806,10 +806,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar" title="Editar">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar Pago" title="Registrar Pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="WhatsApp" title="WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar" title="Eliminar">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -1116,7 +1116,7 @@ function renderDepIndep() {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
       <td style="color:var(--green);font-weight:700;">$${d.monto.toFixed(2)}</td><td>${d.banco}</td>
-      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})" aria-label="Eliminar" title="Eliminar">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1144,7 +1144,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" aria-label="Eliminar" title="Eliminar">×</button>`;
     el.appendChild(c);
   });
 }
@@ -1156,7 +1156,7 @@ function renderClientes() {
   db.clientes.forEach((c,i) => {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
-      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteCli(${i})" aria-label="Eliminar" title="Eliminar">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
