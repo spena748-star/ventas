@@ -207,6 +207,8 @@ tbody tr:hover{background:#f8fafc;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border-width: 0; }
+[role="button"]:focus-visible { outline: 2px solid var(--blue-light); outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -217,6 +219,7 @@ tbody tr:hover{background:#f8fafc;}
     <div class="login-logo">🛍️</div>
     <h1>Admin Ventas Pro</h1>
     <p>Sistema de control de compras y cobranza</p>
+    <label class="sr-only" for="loginPass">Contraseña</label>
     <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" autocomplete="off">
     <button class="login-btn" id="btnLogin">Entrar al sistema</button>
     <div class="login-err" id="loginErr"></div>
@@ -256,13 +259,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Menú principal">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" role="button" tabindex="0" title="Clic para editar" aria-label="Tipo de cambio">💱 TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" role="button" tabindex="0" title="Clic para editar" aria-label="Comisión">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" role="button" tabindex="0" title="Clic para editar" aria-label="Tax USA">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +809,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" title="Editar" aria-label="Editar">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" title="Registrar pago" aria-label="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" title="WhatsApp" aria-label="WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" title="Eliminar" aria-label="Eliminar">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -875,7 +878,7 @@ function renderCobranza() {
       <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        <button class="btn primary xs" onclick="openWA('${e.cliente}')" title="WhatsApp" aria-label="WhatsApp">📲</button>
       </div></td>`;
     tbody.appendChild(tr);
   });
@@ -1116,7 +1119,7 @@ function renderDepIndep() {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
       <td style="color:var(--green);font-weight:700;">$${d.monto.toFixed(2)}</td><td>${d.banco}</td>
-      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})" title="Eliminar" aria-label="Eliminar">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1144,7 +1147,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" title="Eliminar" aria-label="Eliminar">×</button>`;
     el.appendChild(c);
   });
 }
@@ -1156,7 +1159,7 @@ function renderClientes() {
   db.clientes.forEach((c,i) => {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
-      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteCli(${i})" title="Eliminar" aria-label="Eliminar">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1347,6 +1350,14 @@ function initApp() {
   if(hhRunning) hhStart();
   renderDashboard();
   updatePreview();
+
+  // Global keyboard listener for role="button"
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
 
   // Cross-tab sync
   window.addEventListener('storage', (e)=>{
