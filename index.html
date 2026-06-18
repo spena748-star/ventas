@@ -27,6 +27,8 @@
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0;}
+:focus-visible{outline:2px solid var(--blue-light) !important;outline-offset:2px;}
 
 /* LOGIN */
 .login-screen{position:fixed;inset:0;background:linear-gradient(135deg,var(--navy) 0%,#1e3a6e 50%,var(--teal) 100%);display:flex;align-items:center;justify-content:center;z-index:9999;}
@@ -217,6 +219,7 @@ tbody tr:hover{background:#f8fafc;}
     <div class="login-logo">🛍️</div>
     <h1>Admin Ventas Pro</h1>
     <p>Sistema de control de compras y cobranza</p>
+    <label for="loginPass" class="sr-only">Contraseña</label>
     <input class="login-input" type="password" id="loginPass" placeholder="Contraseña" autocomplete="off">
     <button class="login-btn" id="btnLogin">Entrar al sistema</button>
     <div class="login-err" id="loginErr"></div>
@@ -235,17 +238,17 @@ tbody tr:hover{background:#f8fafc;}
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" tabindex="0" role="button"><span class="ni">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" tabindex="0" role="button"><span class="ni">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" tabindex="0" role="button"><span class="ni">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" tabindex="0" role="button"><span class="ni">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" tabindex="0" role="button"><span class="ni">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" tabindex="0" role="button"><span class="ni">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" tabindex="0" role="button"><span class="ni">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" tabindex="0" role="button"><span class="ni">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
       <button id="btnSalir">🚪 Cerrar sesión</button>
@@ -260,9 +263,9 @@ tbody tr:hover{background:#f8fafc;}
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" title="Clic para editar" tabindex="0" role="button">💱 TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" title="Clic para editar" tabindex="0" role="button">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" title="Clic para editar" tabindex="0" role="button">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +809,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" title="Editar" aria-label="Editar">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" title="Registrar pago" aria-label="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" title="Enviar WhatsApp" aria-label="Enviar WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" title="Eliminar" aria-label="Eliminar">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -1355,6 +1358,13 @@ function initApp() {
 }
 
 // ======================== EVENTS ========================
+document.addEventListener('keydown', (e) => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+    e.preventDefault();
+    e.target.click();
+  }
+});
+
 document.getElementById('btnLogin').onclick = () => {
   let p = document.getElementById('loginPass').value;
   if(p==='1234'){ document.getElementById('loginScreen').style.display='none'; document.getElementById('app').style.display='flex'; initApp(); }
