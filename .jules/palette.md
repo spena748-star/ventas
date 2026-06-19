@@ -1,0 +1,3 @@
+## 2026-06-19 - Accessibility Enhancements for Non-Semantic Components
+**Learning:** In this application, many interactive components are implemented using non-semantic tags (spans, divs) which lack native keyboard support and focusability. Simply adding `onclick` is insufficient for accessibility.
+**Action:** Always add `role="button"` and `tabindex="0"` to non-semantic interactive elements, and implement a global keyboard listener for 'Enter' and 'Space' keys to ensure they are fully accessible to keyboard and screen reader users. Additionally, icon-only buttons MUST have `aria-label` and `title` to be usable.
