@@ -235,17 +235,17 @@ tbody tr:hover{background:#f8fafc;}
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" tabindex="0" role="button"><span class="ni">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" tabindex="0" role="button"><span class="ni">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" tabindex="0" role="button"><span class="ni">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" tabindex="0" role="button"><span class="ni">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" tabindex="0" role="button"><span class="ni">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" tabindex="0" role="button"><span class="ni">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" tabindex="0" role="button"><span class="ni">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" tabindex="0" role="button"><span class="ni">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
       <button id="btnSalir">🚪 Cerrar sesión</button>
@@ -256,13 +256,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+        <button class="hamburger" id="hamburger" aria-label="Abrir menú" title="Abrir menú">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+        <span class="badge-tc" id="badgeTC" title="Clic para editar" tabindex="0" role="button">💱 TC: $<span id="tcDisplay">17.40</span></span>
+        <span class="badge-tc" id="badgeCom" title="Clic para editar" tabindex="0" role="button">% Comisión: <span id="comDisplay">10</span>%</span>
+        <span class="badge-tc" id="badgeTax" title="Clic para editar" tabindex="0" role="button">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -313,19 +313,19 @@ tbody tr:hover{background:#f8fafc;}
             </div>
           </div>
           <div class="form-grid">
-            <div class="fg"><label>📅 Fecha</label><input type="date" id="f_fecha"></div>
-            <div class="fg"><label>🏬 Tienda</label><select id="f_tienda"></select></div>
-            <div class="fg"><label>👤 Comprador</label><select id="f_shopper"></select></div>
-            <div class="fg"><label>📱 Cliente (4 dig)</label><input type="text" id="f_cliente" maxlength="4" placeholder="Ej: 2146"></div>
-            <div class="fg"><label>🔢 PZAS</label><input type="number" id="f_pzas" value="1" min="1"></div>
-            <div class="fg"><label>🏷️ Marca</label><select id="f_marca"></select></div>
-            <div class="fg"><label>📦 Producto</label><input type="text" id="f_producto"></div>
-            <div class="fg"><label>📏 Talla</label><input type="text" id="f_talla"></div>
-            <div class="fg"><label>💵 Precio USD (sin tax)</label><input type="number" id="f_precioUSD" step="0.01" placeholder="0.00"></div>
-            <div class="fg"><label>🧾 Tax USA %</label><input type="number" id="f_tax" step="0.01" placeholder="8.25"></div>
-            <div class="fg"><label>💱 Tipo de Cambio</label><input type="number" id="f_tc" step="0.01"></div>
-            <div class="fg"><label>💰 Depósito MXN</label><input type="number" id="f_deposito" value="0" step="0.01"></div>
-            <div class="fg"><label>🏦 Banco</label><select id="f_banco"><option value="">Sin banco</option><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
+            <div class="fg"><label for="f_fecha">📅 Fecha</label><input type="date" id="f_fecha"></div>
+            <div class="fg"><label for="f_tienda">🏬 Tienda</label><select id="f_tienda"></select></div>
+            <div class="fg"><label for="f_shopper">👤 Comprador</label><select id="f_shopper"></select></div>
+            <div class="fg"><label for="f_cliente">📱 Cliente (4 dig)</label><input type="text" id="f_cliente" maxlength="4" placeholder="Ej: 2146"></div>
+            <div class="fg"><label for="f_pzas">🔢 PZAS</label><input type="number" id="f_pzas" value="1" min="1"></div>
+            <div class="fg"><label for="f_marca">🏷️ Marca</label><select id="f_marca"></select></div>
+            <div class="fg"><label for="f_producto">📦 Producto</label><input type="text" id="f_producto"></div>
+            <div class="fg"><label for="f_talla">📏 Talla</label><input type="text" id="f_talla"></div>
+            <div class="fg"><label for="f_precioUSD">💵 Precio USD (sin tax)</label><input type="number" id="f_precioUSD" step="0.01" placeholder="0.00"></div>
+            <div class="fg"><label for="f_tax">🧾 Tax USA %</label><input type="number" id="f_tax" step="0.01" placeholder="8.25"></div>
+            <div class="fg"><label for="f_tc">💱 Tipo de Cambio</label><input type="number" id="f_tc" step="0.01"></div>
+            <div class="fg"><label for="f_deposito">💰 Depósito MXN</label><input type="number" id="f_deposito" value="0" step="0.01"></div>
+            <div class="fg"><label for="f_banco">🏦 Banco</label><select id="f_banco"><option value="">Sin banco</option><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
           </div>
           <!-- PRICE PREVIEW -->
           <div class="price-preview">
@@ -428,12 +428,12 @@ tbody tr:hover{background:#f8fafc;}
         <div class="card">
           <div class="card-header"><div class="card-title">🏦 Depósito sin venta</div></div>
           <div class="form-grid">
-            <div class="fg"><label>Fecha</label><input type="date" id="d_fecha"></div>
-            <div class="fg"><label>Tienda</label><select id="d_tienda"></select></div>
-            <div class="fg"><label>Cliente</label><input type="text" id="d_cliente" maxlength="4"></div>
-            <div class="fg"><label>Shopper</label><select id="d_shopper"></select></div>
-            <div class="fg"><label>Monto MXN</label><input type="number" id="d_monto" step="0.01"></div>
-            <div class="fg"><label>Banco</label><select id="d_banco"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
+            <div class="fg"><label for="d_fecha">Fecha</label><input type="date" id="d_fecha"></div>
+            <div class="fg"><label for="d_tienda">Tienda</label><select id="d_tienda"></select></div>
+            <div class="fg"><label for="d_cliente">Cliente</label><input type="text" id="d_cliente" maxlength="4"></div>
+            <div class="fg"><label for="d_shopper">Shopper</label><select id="d_shopper"></select></div>
+            <div class="fg"><label for="d_monto">Monto MXN</label><input type="number" id="d_monto" step="0.01"></div>
+            <div class="fg"><label for="d_banco">Banco</label><select id="d_banco"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
           </div>
           <button class="btn primary" id="btnRegistrarDep">Registrar depósito</button>
           <div class="tbl-wrap" style="margin-top:18px;">
@@ -485,9 +485,9 @@ tbody tr:hover{background:#f8fafc;}
           <div class="card">
             <div class="card-header"><div class="card-title">👥 Clientes</div></div>
             <div class="form-grid" style="grid-template-columns:1fr 1fr 1fr;">
-              <div class="fg"><label>Código (4 dig)</label><input type="text" id="cl_codigo" maxlength="4" placeholder="2146"></div>
-              <div class="fg"><label>Nombre</label><input type="text" id="cl_nombre" placeholder="Nombre cliente"></div>
-              <div class="fg"><label>WhatsApp</label><input type="text" id="cl_wa" placeholder="521234567890"></div>
+              <div class="fg"><label for="cl_codigo">Código (4 dig)</label><input type="text" id="cl_codigo" maxlength="4" placeholder="2146"></div>
+              <div class="fg"><label for="cl_nombre">Nombre</label><input type="text" id="cl_nombre" placeholder="Nombre cliente"></div>
+              <div class="fg"><label for="cl_wa">WhatsApp</label><input type="text" id="cl_wa" placeholder="521234567890"></div>
             </div>
             <button class="btn primary sm" id="btnAddCliente">💾 Guardar cliente</button>
             <div class="tbl-wrap" style="margin-top:14px;">
@@ -534,8 +534,8 @@ tbody tr:hover{background:#f8fafc;}
 <div class="modal" id="modalPago">
   <div class="modal-box">
     <h3>💵 Registrar pago</h3>
-    <div class="fg" style="margin-bottom:14px;"><label>Monto adicional MXN</label><input type="number" id="montoPago" step="0.01" placeholder="0.00" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;width:100%;outline:none;"></div>
-    <div class="fg" style="margin-bottom:14px;"><label>Banco</label><select id="bancoPago" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Outfit',sans-serif;width:100%;outline:none;"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
+    <div class="fg" style="margin-bottom:14px;"><label for="montoPago">Monto adicional MXN</label><input type="number" id="montoPago" step="0.01" placeholder="0.00" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'Outfit',sans-serif;width:100%;outline:none;"></div>
+    <div class="fg" style="margin-bottom:14px;"><label for="bancoPago">Banco</label><select id="bancoPago" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Outfit',sans-serif;width:100%;outline:none;"><option>BANORTE</option><option>HSBC</option><option>EFECTIVO</option></select></div>
     <div class="modal-footer">
       <button class="btn outline" id="btnCancelPago">Cancelar</button>
       <button class="btn success" id="btnConfirmarPago">✓ Aplicar pago</button>
@@ -547,7 +547,7 @@ tbody tr:hover{background:#f8fafc;}
   <div class="modal-box">
     <h3>📲 Enviar resumen por WhatsApp</h3>
     <p id="waClienteInfo" style="font-size:13px;color:var(--text2);margin-bottom:14px;"></p>
-    <div class="fg" style="margin-bottom:14px;"><label>Número WhatsApp (con código país)</label><input type="text" id="waNumero" placeholder="521234567890" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Outfit',sans-serif;width:100%;outline:none;"></div>
+    <div class="fg" style="margin-bottom:14px;"><label for="waNumero">Número WhatsApp (con código país)</label><input type="text" id="waNumero" placeholder="521234567890" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'Outfit',sans-serif;width:100%;outline:none;"></div>
     <div class="modal-footer">
       <button class="btn outline" id="btnCancelWA">Cancelar</button>
       <button class="btn success" id="btnEnviarWA">📤 Enviar</button>
@@ -683,19 +683,19 @@ function openEdit(idx) {
   let v = db.ventas[idx];
   document.getElementById('editFormContainer').innerHTML = `
     <div class="form-grid" style="grid-template-columns:1fr 1fr;">
-      <div class="fg"><label>Fecha</label><input type="date" id="e_fecha" value="${v.fecha}"></div>
-      <div class="fg"><label>Tienda</label><select id="e_tienda">${db.tiendas.map(t=>`<option ${t===v.tienda?'selected':''}>${t}</option>`).join('')}</select></div>
-      <div class="fg"><label>Shopper</label><select id="e_shopper">${db.shoppers.map(s=>`<option ${s===v.shopper?'selected':''}>${s}</option>`).join('')}</select></div>
-      <div class="fg"><label>Cliente</label><input type="text" id="e_cliente" value="${v.cliente}" maxlength="4"></div>
-      <div class="fg"><label>PZAS</label><input type="number" id="e_pzas" value="${v.pzas}" min="1"></div>
-      <div class="fg"><label>Marca</label><input type="text" id="e_marca" value="${v.marca||''}"></div>
-      <div class="fg"><label>Producto</label><input type="text" id="e_producto" value="${v.producto}"></div>
-      <div class="fg"><label>Talla</label><input type="text" id="e_talla" value="${v.talla||''}"></div>
-      <div class="fg"><label>Precio USD</label><input type="number" id="e_precioU" step="0.01" value="${v.precioU}"></div>
-      <div class="fg"><label>Tax %</label><input type="number" id="e_tax" step="0.01" value="${v.tax||db.taxUSA}"></div>
-      <div class="fg"><label>TC</label><input type="number" id="e_tc" step="0.01" value="${v.tc}"></div>
-      <div class="fg"><label>Depósito</label><input type="number" id="e_dep" step="0.01" value="${v.deposito}"></div>
-      <div class="fg"><label>Banco</label><input type="text" id="e_banco" value="${v.banco||''}"></div>
+      <div class="fg"><label for="e_fecha">Fecha</label><input type="date" id="e_fecha" value="${v.fecha}"></div>
+      <div class="fg"><label for="e_tienda">Tienda</label><select id="e_tienda">${db.tiendas.map(t=>`<option ${t===v.tienda?'selected':''}>${t}</option>`).join('')}</select></div>
+      <div class="fg"><label for="e_shopper">Shopper</label><select id="e_shopper">${db.shoppers.map(s=>`<option ${s===v.shopper?'selected':''}>${s}</option>`).join('')}</select></div>
+      <div class="fg"><label for="e_cliente">Cliente</label><input type="text" id="e_cliente" value="${v.cliente}" maxlength="4"></div>
+      <div class="fg"><label for="e_pzas">PZAS</label><input type="number" id="e_pzas" value="${v.pzas}" min="1"></div>
+      <div class="fg"><label for="e_marca">Marca</label><input type="text" id="e_marca" value="${v.marca||''}"></div>
+      <div class="fg"><label for="e_producto">Producto</label><input type="text" id="e_producto" value="${v.producto}"></div>
+      <div class="fg"><label for="e_talla">Talla</label><input type="text" id="e_talla" value="${v.talla||''}"></div>
+      <div class="fg"><label for="e_precioU">Precio USD</label><input type="number" id="e_precioU" step="0.01" value="${v.precioU}"></div>
+      <div class="fg"><label for="e_tax">Tax %</label><input type="number" id="e_tax" step="0.01" value="${v.tax||db.taxUSA}"></div>
+      <div class="fg"><label for="e_tc">TC</label><input type="number" id="e_tc" step="0.01" value="${v.tc}"></div>
+      <div class="fg"><label for="e_dep">Depósito</label><input type="number" id="e_dep" step="0.01" value="${v.deposito}"></div>
+      <div class="fg"><label for="e_banco">Banco</label><input type="text" id="e_banco" value="${v.banco||''}"></div>
     </div>`;
   document.getElementById('modalEditar').classList.add('open');
 }
@@ -806,10 +806,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar venta" title="Editar venta">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar pago" title="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="Enviar WhatsApp" title="Enviar WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar venta" title="Eliminar venta">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -875,7 +875,7 @@ function renderCobranza() {
       <td class="${dif>0?'saldo-pend':(dif<0?'saldo-over':'saldo-ok')}">$${Math.abs(dif).toFixed(2)}${dif<0?' (a favor)':''}</td>
       <td><span class="badge ${estado}">${estadoL}</span></td>
       <td><div class="actions-cell">
-        <button class="btn primary xs" onclick="openWA('${e.cliente}')">📲</button>
+        <button class="btn primary xs" onclick="openWA('${e.cliente}')" aria-label="Enviar WhatsApp" title="Enviar WhatsApp">📲</button>
       </div></td>`;
     tbody.appendChild(tr);
   });
@@ -1116,7 +1116,7 @@ function renderDepIndep() {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
       <td style="color:var(--green);font-weight:700;">$${d.monto.toFixed(2)}</td><td>${d.banco}</td>
-      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})" aria-label="Eliminar depósito" title="Eliminar depósito">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1144,7 +1144,7 @@ function renderChips(id, arr, onDel) {
   arr.forEach((item,i) => {
     let c = document.createElement('span');
     c.className = 'chip';
-    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})">×</button>`;
+    c.innerHTML = `${item} <button class="chip-del" onclick="(${onDel.toString()})(${i})" aria-label="Eliminar ${item}" title="Eliminar ${item}">×</button>`;
     el.appendChild(c);
   });
 }
@@ -1156,7 +1156,7 @@ function renderClientes() {
   db.clientes.forEach((c,i) => {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
-      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteCli(${i})" aria-label="Eliminar cliente" title="Eliminar cliente">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1347,6 +1347,14 @@ function initApp() {
   if(hhRunning) hhStart();
   renderDashboard();
   updatePreview();
+
+  // Global keyboard listener for elements with role="button"
+  document.addEventListener('keydown', (e) => {
+    if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+      e.preventDefault();
+      e.target.click();
+    }
+  });
 
   // Cross-tab sync
   window.addEventListener('storage', (e)=>{

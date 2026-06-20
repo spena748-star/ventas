@@ -1,0 +1,3 @@
+## 2026-06-20 - Keyboard Accessibility for Non-Semantic Buttons
+**Learning:** In this application, interactive components like navigation items and configuration badges are implemented using `span` and `div` tags. These elements do not natively receive keyboard focus or respond to the "Enter" or "Space" keys, making them inaccessible to keyboard-only users.
+**Action:** Always add `tabindex="0"` and `role="button"` to non-semantic interactive elements, and implement a global keyboard event listener in the application's initialization to handle "Enter" and "Space" key presses for any element with `role="button"`.
