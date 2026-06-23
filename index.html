@@ -772,24 +772,29 @@ function closeModal(id) {
 }
 
 // ======================== RENDER VENTAS ========================
+/**
+ * Optimized renderVentas:
+ * 1. Replaced O(N^2) indexOf inside the loop with the loop index i.
+ * 2. Batched DOM updates by using innerHTML instead of multiple appendChild calls.
+ * 3. Reduced complexity to O(N) by combining filtering and rendering in one pass.
+ */
 function renderVentas() {
-  let filtro = (document.getElementById('filtroVentas')?.value||'').toLowerCase();
-  let filtroSh = document.getElementById('filtroShopperV')?.value||'';
-  let filtroTi = document.getElementById('filtroTiendaV')?.value||'';
-  let tbody = document.getElementById('tbodyVentas');
-  tbody.innerHTML = '';
-  let filtered = db.ventas.filter(v => {
-    let match = !filtro || `${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro);
-    let sh = !filtroSh || v.shopper === filtroSh;
-    let ti = !filtroTi || v.tienda === filtroTi;
-    return match && sh && ti;
-  });
-  filtered.forEach((v, i) => {
-    let idx = db.ventas.indexOf(v);
-    let estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
-    let estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
+  const filtro = (document.getElementById('filtroVentas')?.value || '').toLowerCase();
+  const filtroSh = document.getElementById('filtroShopperV')?.value || '';
+  const filtroTi = document.getElementById('filtroTiendaV')?.value || '';
+  const tbody = document.getElementById('tbodyVentas');
+
+  let html = '';
+  for (let i = 0; i < db.ventas.length; i++) {
+    const v = db.ventas[i];
+    if (filtro && !`${v.cliente} ${v.producto} ${v.marca} ${v.tienda} ${v.shopper}`.toLowerCase().includes(filtro)) continue;
+    if (filtroSh && v.shopper !== filtroSh) continue;
+    if (filtroTi && v.tienda !== filtroTi) continue;
+
+    const estado = v.dif <= 0 ? 'pagado' : (v.deposito > 0 ? 'parcial' : 'pendiente');
+    const estadoLabel = v.dif <= 0 ? 'Pagado' : (v.deposito > 0 ? 'Parcial' : 'Pendiente');
+
+    html += `<tr>
       <td>#${v.id}</td>
       <td>${v.fecha}</td>
       <td>${v.tienda}</td>
@@ -806,14 +811,15 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${i})" title="Editar" aria-label="Editar">✏️</button>
+          <button class="btn success xs" onclick="openPago(${i})" title="Registrar Pago" aria-label="Registrar Pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" title="WhatsApp" aria-label="WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${i})" title="Eliminar" aria-label="Eliminar">🗑️</button>
         </div>
-      </td>`;
-    tbody.appendChild(tr);
-  });
+      </td>
+    </tr>`;
+  }
+  tbody.innerHTML = html;
 }
 
 // ======================== RENDER COBRANZA ========================
