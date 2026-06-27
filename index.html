@@ -207,6 +207,8 @@ tbody tr:hover{background:#f8fafc;}
 ::-webkit-scrollbar{width:5px;height:5px;}
 ::-webkit-scrollbar-track{background:transparent;}
 ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+
+[role="button"]:focus-visible, button:focus-visible { outline: 2px solid var(--blue-light) !important; outline-offset: 2px; }
 </style>
 </head>
 <body>
@@ -235,17 +237,17 @@ tbody tr:hover{background:#f8fafc;}
     </div>
     <nav>
       <div class="nav-section">Principal</div>
-      <div class="nav-item active" data-panel="dashboard"><span class="ni">📈</span>Dashboard</div>
-      <div class="nav-item" data-panel="captura"><span class="ni">➕</span>Capturar venta</div>
+      <div class="nav-item active" data-panel="dashboard" role="button" tabindex="0"><span class="ni">📈</span>Dashboard</div>
+      <div class="nav-item" data-panel="captura" role="button" tabindex="0"><span class="ni">➕</span>Capturar venta</div>
       <div class="nav-section">Gestión</div>
-      <div class="nav-item" data-panel="cobranza"><span class="ni">💳</span>Cobranza</div>
-      <div class="nav-item" data-panel="ventas"><span class="ni">📋</span>Ventas</div>
-      <div class="nav-item" data-panel="depositos"><span class="ni">🏦</span>Depósitos</div>
+      <div class="nav-item" data-panel="cobranza" role="button" tabindex="0"><span class="ni">💳</span>Cobranza</div>
+      <div class="nav-item" data-panel="ventas" role="button" tabindex="0"><span class="ni">📋</span>Ventas</div>
+      <div class="nav-item" data-panel="depositos" role="button" tabindex="0"><span class="ni">🏦</span>Depósitos</div>
       <div class="nav-section">Análisis</div>
-      <div class="nav-item" data-panel="reportes"><span class="ni">📊</span>Reportes</div>
+      <div class="nav-item" data-panel="reportes" role="button" tabindex="0"><span class="ni">📊</span>Reportes</div>
       <div class="nav-section">Config</div>
-      <div class="nav-item" data-panel="catalogos"><span class="ni">⚙️</span>Catálogos</div>
-      <div class="nav-item" data-panel="socios"><span class="ni">🤝</span>Socios</div>
+      <div class="nav-item" data-panel="catalogos" role="button" tabindex="0"><span class="ni">⚙️</span>Catálogos</div>
+      <div class="nav-item" data-panel="socios" role="button" tabindex="0"><span class="ni">🤝</span>Socios</div>
     </nav>
     <div class="sidebar-footer">
       <button id="btnSalir">🚪 Cerrar sesión</button>
@@ -256,13 +258,13 @@ tbody tr:hover{background:#f8fafc;}
   <div class="main">
     <div class="top-bar">
       <div style="display:flex;align-items:center;gap:12px;">
-        <button class="hamburger" id="hamburger">☰</button>
+          <button class="hamburger" id="hamburger" aria-label="Abrir menú lateral">☰</button>
         <span class="page-title" id="pageTitle">Dashboard</span>
       </div>
       <div class="top-bar-right">
-        <span class="badge-tc" id="badgeTC" title="Clic para editar">💱 TC: $<span id="tcDisplay">17.40</span></span>
-        <span class="badge-tc" id="badgeCom" title="Clic para editar">% Comisión: <span id="comDisplay">10</span>%</span>
-        <span class="badge-tc" id="badgeTax" title="Clic para editar">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
+          <span class="badge-tc" id="badgeTC" title="Clic para editar" role="button" tabindex="0">💱 TC: $<span id="tcDisplay">17.40</span></span>
+          <span class="badge-tc" id="badgeCom" title="Clic para editar" role="button" tabindex="0">% Comisión: <span id="comDisplay">10</span>%</span>
+          <span class="badge-tc" id="badgeTax" title="Clic para editar" role="button" tabindex="0">🏷️ Tax USA: <span id="taxDisplay">8.25</span>%</span>
       </div>
     </div>
 
@@ -806,10 +808,10 @@ function renderVentas() {
       <td><span class="badge ${estado}">${estadoLabel}</span></td>
       <td>
         <div class="actions-cell">
-          <button class="btn outline xs" onclick="openEdit(${idx})">✏️</button>
-          <button class="btn success xs" onclick="openPago(${idx})">💵</button>
-          <button class="btn primary xs" onclick="openWA('${v.cliente}')">📲</button>
-          <button class="btn danger xs" onclick="deleteVenta(${idx})">🗑️</button>
+          <button class="btn outline xs" onclick="openEdit(${idx})" aria-label="Editar venta" title="Editar venta">✏️</button>
+          <button class="btn success xs" onclick="openPago(${idx})" aria-label="Registrar pago" title="Registrar pago">💵</button>
+          <button class="btn primary xs" onclick="openWA('${v.cliente}')" aria-label="Enviar WhatsApp" title="Enviar WhatsApp">📲</button>
+          <button class="btn danger xs" onclick="deleteVenta(${idx})" aria-label="Eliminar venta" title="Eliminar venta">🗑️</button>
         </div>
       </td>`;
     tbody.appendChild(tr);
@@ -1116,7 +1118,7 @@ function renderDepIndep() {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td>${d.fecha}</td><td>${d.tienda}</td><td><strong>${d.cliente}</strong></td><td>${d.shopper}</td>
       <td style="color:var(--green);font-weight:700;">$${d.monto.toFixed(2)}</td><td>${d.banco}</td>
-      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteDepIndep(${i})" aria-label="Eliminar depósito" title="Eliminar depósito">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
@@ -1129,10 +1131,10 @@ function deleteDepIndep(i) {
 
 // ======================== CATALOGS ========================
 function renderCatalogs() {
-  renderChips('listTiendas', db.tiendas, (i)=>{ if(db.tiendas.length>1){db.tiendas.splice(i,1);save();refreshAll();}});
-  renderChips('listShoppers', db.shoppers, (i)=>{ if(db.shoppers.length>1){db.shoppers.splice(i,1);save();refreshAll();}});
-  renderChips('listMarcas', db.marcas, (i)=>{ db.marcas.splice(i,1);save();refreshAll();});
-  renderChips('listSocios', db.socios, (i)=>{ db.socios.splice(i,1);save();renderSocios();});
+  renderChips('listTiendas', db.tiendas, (i)=>{ if(db.tiendas.length>1 && confirm('¿Eliminar tienda?')){db.tiendas.splice(i,1);save();refreshAll();}});
+  renderChips('listShoppers', db.shoppers, (i)=>{ if(db.shoppers.length>1 && confirm('¿Eliminar shopper?')){db.shoppers.splice(i,1);save();refreshAll();}});
+  renderChips('listMarcas', db.marcas, (i)=>{ if(confirm('¿Eliminar marca?')){db.marcas.splice(i,1);save();refreshAll();}});
+  renderChips('listSocios', db.socios, (i)=>{ if(confirm('¿Eliminar socio?')){db.socios.splice(i,1);save();renderSocios();}});
   renderClientes();
   updateSelects();
 }
@@ -1156,18 +1158,19 @@ function renderClientes() {
   db.clientes.forEach((c,i) => {
     let tr = document.createElement('tr');
     tr.innerHTML = `<td><strong>${c.codigo}</strong></td><td>${c.nombre||''}</td><td>${c.wa||''}</td>
-      <td><button class="btn danger xs" onclick="deleteCli(${i})">🗑️</button></td>`;
+      <td><button class="btn danger xs" onclick="deleteCli(${i})" aria-label="Eliminar cliente" title="Eliminar cliente">🗑️</button></td>`;
     tbody.appendChild(tr);
   });
 }
 
 function deleteCli(i) {
+  if(!confirm('¿Eliminar este cliente?')) return;
   db.clientes.splice(i,1);
   save(); renderClientes();
 }
 
 function renderSocios() {
-  renderChips('listSocios', db.socios, (i)=>{ db.socios.splice(i,1);save();renderSocios();});
+  renderChips('listSocios', db.socios, (i)=>{ if(confirm('¿Eliminar socio?')){db.socios.splice(i,1);save();renderSocios();}});
   let el = document.getElementById('liquidacionContent');
   if(!el) return;
   if(db.socios.length === 0) { el.innerHTML = '<p style="color:var(--text3);">Sin socios configurados.</p>'; return; }
@@ -1432,6 +1435,14 @@ document.getElementById('btnAddCliente').onclick = ()=>{
 });
 ['filtroVentas','filtroShopperV','filtroTiendaV'].forEach(id=>{
   let el=document.getElementById(id); if(el) el.addEventListener('input',renderVentas);
+});
+
+// Accessibility: Keyboard support for role="button"
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.getAttribute('role') === 'button') {
+    e.preventDefault();
+    e.target.click();
+  }
 });
 </script>
 </body>
