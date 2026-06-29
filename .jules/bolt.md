@@ -1,0 +1,3 @@
+## 2026-06-29 - Optimized Table Rendering and Dashboard Logic
+**Learning:** In vanilla JS applications with large datasets, `filter().forEach()` chains that use `indexOf` inside the loop to find original array indices create O(N^2) complexity. Using a single `for` loop captures the index directly and is much faster. Also, batching DOM updates with `innerHTML` instead of repeated `appendChild` significantly reduces layout thrashing.
+**Action:** Always prefer single-pass loops and batched `innerHTML` updates for rendering large tables or lists. Ensure accessibility is maintained when using template strings by including `aria-label` and `title` attributes.
