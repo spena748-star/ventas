@@ -1,0 +1,3 @@
+## 2026-06-15 - Accessibility Micro-Sweep for Single-File Web Apps
+**Learning:** In a single-file application using non-semantic interactive elements (like `span` for badges or `div` for nav items), accessibility requires a multi-pronged approach: CSS for `:focus-visible`, `role="button"` and `tabindex="0"` for semantic meaning and keyboard reach, and a global keyboard event listener in the initialization logic to handle activation.
+**Action:** When working on similar architectures, apply this "micro-sweep" pattern early to ensure the app is usable by keyboard and screen reader users without major structural changes.
