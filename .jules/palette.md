@@ -1,0 +1,3 @@
+## 2025-07-05 - Keyboard Accessibility for Non-Semantic Components
+**Learning:** Custom UI components implemented with `div` or `span` tags (like sidebar nav items or badges) lack native keyboard accessibility and focus management. Users cannot navigate to or activate these elements using only a keyboard without explicit `tabindex`, `role="button"`, and event listeners for 'Enter' and 'Space'.
+**Action:** Always include `tabindex="0"`, `role="button"`, and a global keyboard event listener when using non-semantic tags for interactive elements. Ensure a clear `:focus-visible` outline is provided to guide the user.
