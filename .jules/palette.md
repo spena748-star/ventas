@@ -1,0 +1,3 @@
+## 2026-07-06 - Accessibility Micro-Sweep Pattern
+**Learning:** In legacy single-file applications using non-semantic elements (divs, spans) as interactive components, a "micro-sweep" consisting of global `:focus-visible` CSS, `tabindex="0"`, `role="button"`, and a shared `keydown` listener in the initialization function provides the most efficient path to keyboard accessibility and screen reader support with minimal code changes (< 50 lines).
+**Action:** Use this pattern as a baseline for UX/A11y tasks in similar monolithic vanilla JS environments to ensure consistent focus indicators and keyboard activation across the entire UI.
